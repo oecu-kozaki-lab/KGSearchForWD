@@ -1,0 +1,35 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+header > h1 {
+    margin: 0;
+    background-color: #99cc00;
+}
+
+.container {
+    margin: 1em;
+    padding: 0;
+    text-align: left;
+}
+
+.t_area {
+    overflow:auto;
+    width: 100%;
+    height: 15vh;
+    border: solid 1px #ccc;
+}
+
+table {
+	/* width: 100%; */
+	table-layout: fixed;
+	word-break: break-all;
+	word-wrap: break-all;
+	}
+
+ iframe {
+	border: none;
+	height: 100%;
+	width: 100%;
+}

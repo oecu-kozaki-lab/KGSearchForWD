@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Wikidataを用いた検索システム</title>
+
+<link rel="stylesheet" href="style.css">
+<!-- KG検索用のライブラリ読み込み -->
+<script src="KGSearch.js"></script> 
+
+<script>
+//詳細表示ページ用の設定
+const keylink = "key";	//リンクのkeyとする変数
+const detail_html = "details.html"; //詳細表示用のHTMLファイル
+
+window.addEventListener('load', async () => {
+	const sendButton = document.getElementById('send');
+
+	//検索実行ボタンの処理
+	sendButton.addEventListener('click', async () => {
+        makeQuery();
+	}, false);
+
+    //パラメータ(?key=XXXX)を使ったアクセスの処理
+    var param = location.search;
+    if(param!=""){
+        document.getElementById('INPUT').value = decodeURI(param.replace("?key=",""));
+        document.getElementById('head').style.display = 'none';
+        document.getElementById('menu').style.display = 'none';
+		makeQuery();
+    }
+
+}, false);
+
+//検索に用いるSPARQLクエリを生成し，実行する
+async function makeQuery(){
+    const endpoint = "https://query.wikidata.org/sparql";
+    const resultArea = document.getElementById('result_div');
+	let query = document.getElementById('query_area').value;
+
+	//  検索条件を設定するには下記のコメントを外す 
+	const textLABEL = document.getElementById('LABEL').value;
+    const textINPUT = document.getElementById('INPUT').value;
+    const textYEAR = document.getElementById('YEAR').value;
+    if(textLABEL!=""){
+        query = query.replace( '#FILTER(contains(?LABEL,"#LBL#"))', 
+								'FILTER(contains(?LABEL,"'+textLABEL+'"))' )
+					.replace('#rdfs:label ?LABEL;','rdfs:label ?LABEL;');
+    }
+	if(textINPUT!=""){
+        query = query.replace( '?INPUT', '"'+textINPUT+'"@ja' );
+    }
+	if(textYEAR!=""){
+        query = query.replace( '#FILTER(?p571 >= "####-01-01T00:00:00Z"^^xsd:dateTime)', 
+								'FILTER(?p571 >= "'+textYEAR+'-01-01T00:00:00Z"^^xsd:dateTime)' );
+    }
+	document.getElementById('query_area2').value=query; //置換後のクエリを保存
+
+    //SPARQLクエリの実行
+    try {
+		document.getElementById('result_box').style.display="flex";
+        resultArea.innerHTML="<h2>検索中...</h2>";
+        const result = await sendQuery(endpoint, query);
+        if (!result.ok) {
+            resultArea.innerText = "クエリエラーが発生しました";
+            return;
+        }		
+        const resultData = await result.json();	
+        document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');
+        
+		showResult(resultData,resultArea); //クエリ結果の表示【テーブル表示用】
+        //showResultDetails(resultData,resultArea); //クエリ結果の表示【詳細表示用】
+    } catch (e) {
+            alert(e.message);
+        throw e;
+    }
+}
+
+</script>
+</head>
+
+<body>
+<header id="head" >
+	<h1>Wikidataを用いた検索システム</h1>
+</header>
+
+<!-- 検索条件設定の領域 -->
+<div id="menu" class="container">
+	<div style="margin-top:4px;">
+		<!-- 検索条件を設定するには下記のコメントを外す  -->
+		<b>検索条件の設定：</b>:<br>
+			名称（例：大阪電気）：<input id="LABEL" type="text" value="" autocomplete="off" size="40"/><br>
+			所在地（例：寝屋川市，大阪府）：<input id="INPUT" type="text" value="" autocomplete="off" size="40"/><br>
+			設立年（XXXX年以降，1990）：<input id="YEAR" type="text" value="" autocomplete="off" size="40"/><br>
+		<hr>
+		<input type="button" id="dis_b" value="クエリの表示"
+			onclick="document.getElementById('query').style.display = 'block';
+			document.getElementById('dis_b').style.display = 'none';
+			document.getElementById('none_b').style.display = 'block';">
+		<input type="button" id="none_b"  value="クエリの非表示" style="display:none"
+			onclick="document.getElementById('query').style.display = 'none';
+			document.getElementById('dis_b').style.display = 'block';
+			document.getElementById('none_b').style.display = 'none';">
+	</div>
+
+<div id="query" style="display:none">
+置き換え前のクエリ：<br>
+<textarea id="query_area" class="t_area" rows="10">
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+	
+select DISTINCT ?s ?sLabel ?p131Label ?p17Label ?p18 ?p856 ?p571
+where{
+	?s wdt:P31/wdt:P279* wd:Q3918 ;
+		wdt:P17 wd:Q17;
+		wdt:P131/rdfs:label|wdt:P131/wdt:P131/rdfs:label ?INPUT;
+		#rdfs:label ?LABEL;
+		wdt:P131 ?p131;
+		wdt:P17 ?p17;
+		wdt:P18 ?p18;
+		wdt:P856 ?p856;
+		wdt:P571 ?p571.
+	#FILTER(contains(?LABEL,"#LBL#"))
+	#FILTER(?p571 >= "####-01-01T00:00:00Z"^^xsd:dateTime)
+	SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
+}LIMIT 10	
+</textarea>
+<br>
+置き換え後のクエリ：<br>
+<textarea id="query_area2" class="t_area" rows="10" >
+</textarea>
+<br>
+クエリ実行結果の戻り値(JSON形式）：<br>
+<textarea id="resjson_area"  class="t_area" rows="10" >
+</textarea>
+</div>
+
+<input type="button" id="send" value="検索の実行" style="margin-top:8px; ">
+</div>
+
+<!-- 結果表示用の領域 -->
+<div id="result_box" style=" display: none;  ">
+	<div id="result_div"  class="container" style="flex: 1; "></div>
+	<!-- 詳細表示画面を使用するときは，この下のコメントアウトを外す -->
+	<!-- <div id="details_div" style="width: 300px; ">
+		<iframe src="" name="details"></iframe>
+	</div> -->
+</div>
+<hr>
+</body>
+</html>
