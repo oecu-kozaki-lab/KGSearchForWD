@@ -17,6 +17,24 @@ function sendQuery(endpoint, sparql) {
 
 
 /*
+ * GETでAPIにクエリ送信
+ */
+function sendGetQuery(endpoint, options) {
+	//var url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&search=大阪&language=en&limit=50&format=json&origin=*";
+		
+	var url = endpoint + options +"&origin=*";
+
+	const headers = {
+		Accept: 'application/results+json'
+	}
+	return fetch(url, {
+		method: 'GET',
+		// headers,
+		cache: 'no-cache',
+  	});
+}
+
+/*
  * クエリ結果の表示【テーブル表示用】
  */
 function showResult(resultData,resultArea){
@@ -161,4 +179,29 @@ function showData(data_i){
 	mesText = mesText.replace('T00:00:00Z','');//日付について「年月日のみ」の場合は不要部分を削除
 
 	return mesText;
+}
+
+/*
+ * クエリ結果の表示【WikiMedia API用】
+ */
+function showWdResult(resultData,resultArea){
+	const data = resultData.search;
+	let mesText = "" ;
+	for(let i = 0; i < data.length; i++){
+		mesText+= data[i].match.text
+			+'（<a href="'+ data[i].concepturi+'" target="_blank">'+data[i].id+ "</a>）<br>\n";
+	}
+	resultArea.innerHTML = mesText;//+'</table>';
+}
+
+/*
+ * クエリ結果の表示【WikiMedia API用】
+ */
+function showWdResultWithLink(resultData,resultArea){
+	const data = resultData.search;
+	let mesText = "" ;
+	for(let i = 0; i < data.length; i++){
+		mesText+= data[i].match.text+"（" + getLinkURL(data[i].concepturi)+"）<br>\n";
+	}
+	resultArea.innerHTML = mesText;//+'</table>';
 }
