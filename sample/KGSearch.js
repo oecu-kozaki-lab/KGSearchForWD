@@ -1,3 +1,13 @@
+/* 
+ * 検索中...アニメーションの表示
+ */
+function showSearchIng(resultArea){
+	resultArea.innerHTML="<h2>検索中...</h2>"
+	   + '<div class="flower-spinner"><div class="dots-container">'
+	   +'<div class="bigger-dot"><div class="smaller-dot"></div>'
+	   +'</div></div></div>';
+}
+
 
 /*
  * endpointで指定されたSPARQLエンドポイントにクエリを送信
@@ -15,13 +25,31 @@ function sendQuery(endpoint, sparql) {
 	});
 }
 
+/*
+ * endpointで指定されたSPARQLエンドポイントにクエリを送信
+ */
+async function sendSPARQLQuery(endpoint,options){
+    try {
+		const result = await sendQuery(endpoint,options);
+        if (!result.ok) {
+			console.log("クエリエラーが発生しました");
+            return;
+        }		
+        const resultData = await result.json();	
+        console.log(resultData);
+
+		return resultData;
+    } catch (e) {
+            alert(e.message);
+        throw e;
+    }
+}
+
 
 /*
  * GETでAPIにクエリ送信
  */
 function sendGetQuery(endpoint, options) {
-	//var url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&search=大阪&language=en&limit=50&format=json&origin=*";
-		
 	var url = endpoint + options +"&origin=*";
 
 	const headers = {
@@ -33,6 +61,55 @@ function sendGetQuery(endpoint, options) {
 		cache: 'no-cache',
   	});
 }
+
+
+//WikiMedia APIを使ってIDを取得
+async function sendWdQuery(endpoint,options){
+    try {
+		const result = await sendGetQuery(endpoint,options);
+        if (!result.ok) {
+			console.log("クエリエラーが発生しました");
+            return;
+        }		
+        const resultData = await result.json();	
+        console.log(resultData);
+
+		return resultData;
+    } catch (e) {
+            alert(e.message);
+        throw e;
+    }
+}
+
+
+
+//WikiMedia APIを使ってIDを取得
+async function getWdIDs(label){
+    const endpoint ="https://www.wikidata.org/w/api.php";
+    const options ="?action=wbsearchentities&search="+label+"&language=en&limit=50&format=json";
+
+    try {
+		const result = await sendGetQuery(endpoint,options);
+        if (!result.ok) {
+			console.log("クエリエラーが発生しました");
+            return;
+        }		
+        const resultData = await result.json();	
+        console.log(resultData);
+
+		const data = resultData.search;
+		let ids = new Array();
+		for(let i = 0; i < data.length; i++){
+			ids.push(data[i].id);
+		}
+		return ids;
+    } catch (e) {
+            alert(e.message);
+        throw e;
+    }
+}
+
+
 
 /*
  * クエリ結果の表示【テーブル表示用】
@@ -50,12 +127,17 @@ function showResult(resultData,resultArea){
 
 	for(let i = 0; i < data.length; i++){
 		mesText+="<tr>";
+		
     	for(let j = 0; j < keys.length; j++){
+			let val = "-";
+			if(data[i][keys[j]]!=null){
+				val =data[i][keys[j]].value;
+			}
             if(keys[j]==keylink){ //変数名が「keylink」のときは詳細表示へのリンク
-                mesText += '<th>'+getLinkURL(data[i][keys[j]].value)+'</th>';
+                mesText += '<th>'+getLinkURL(val)+'</th>';
             }
             else{
-                mesText += '<th>'+getHtmlData(data[i][keys[j]].value)+'</th>';
+                mesText += '<th>'+getHtmlData(val)+'</th>';
             }			
 		}
 		mesText+="</tr>";
@@ -188,7 +270,8 @@ function showWdResult(resultData,resultArea){
 	const data = resultData.search;
 	let mesText = "" ;
 	for(let i = 0; i < data.length; i++){
-		mesText+= data[i].match.text+" "+data[i].id+ " " + data[i].concepturi+"<br>\n";
+		mesText+= data[i].match.text
+			+'（<a href="'+ data[i].concepturi+'" target="_blank">'+data[i].id+ "</a>）<br>\n";
 	}
 	resultArea.innerHTML = mesText;//+'</table>';
 }

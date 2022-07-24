@@ -1,3 +1,13 @@
+/* 
+ * 検索中...アニメーションの表示
+ */
+function showSearchIng(resultArea){
+	resultArea.innerHTML="<h2>検索中...</h2>"
+	   + '<div class="flower-spinner"><div class="dots-container">'
+	   +'<div class="bigger-dot"><div class="smaller-dot"></div>'
+	   +'</div></div></div>';
+}
+
 
 /*
  * endpointで指定されたSPARQLエンドポイントにクエリを送信
@@ -117,12 +127,17 @@ function showResult(resultData,resultArea){
 
 	for(let i = 0; i < data.length; i++){
 		mesText+="<tr>";
+		
     	for(let j = 0; j < keys.length; j++){
+			let val = "-";
+			if(data[i][keys[j]]!=null){
+				val =data[i][keys[j]].value;
+			}
             if(keys[j]==keylink){ //変数名が「keylink」のときは詳細表示へのリンク
-                mesText += '<th>'+getLinkURL(data[i][keys[j]].value)+'</th>';
+                mesText += '<th>'+getLinkURL(val)+'</th>';
             }
             else{
-                mesText += '<th>'+getHtmlData(data[i][keys[j]].value)+'</th>';
+                mesText += '<th>'+getHtmlData(val)+'</th>';
             }			
 		}
 		mesText+="</tr>";

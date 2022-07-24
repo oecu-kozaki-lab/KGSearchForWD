@@ -21,8 +21,8 @@ window.addEventListener('load', async () => {
 
 	//検索実行ボタンの処理
 	sendButton.addEventListener('click', async () => {
-        //makeQuery();
-		makeWikidataQuery();
+        makeQuery();
+		//makeWikidataQuery();
 	}, false);
 
     //パラメータ(?key=XXXX)を使ったアクセスの処理
@@ -31,8 +31,8 @@ window.addEventListener('load', async () => {
         document.getElementById('INPUT').value = decodeURI(param.replace("?key=",""));
         document.getElementById('head').style.display = 'none';
         document.getElementById('menu').style.display = 'none';
-		//makeQuery();
-		makeWikidataQuery();
+		makeQuery();
+		//makeWikidataQuery();
     }
 
 }, false);
@@ -44,38 +44,44 @@ async function makeQuery(){
 	let query = document.getElementById('query_area').value;
 
 	//  検索条件を設定するには下記のコメントを外す 
-/*	const textLABEL = document.getElementById('LABEL').value;
-    const textINPUT = document.getElementById('INPUT').value;
-    const textYEAR = document.getElementById('YEAR').value;
+	const textLABEL = document.getElementById('LABEL').value;
     if(textLABEL!=""){
         query = query.replace( '#FILTER(contains(?LABEL,"#LBL#"))', 
 								'FILTER(contains(?LABEL,"'+textLABEL+'"))' )
-					.replace('#rdfs:label ?LABEL;','rdfs:label ?LABEL;');
+					.replace('#?s rdfs:label ?LABEL.','?s rdfs:label ?LABEL.');
+		document.getElementById('query_area2').value=query; //置換後のクエリを保存
     }
-	if(textINPUT!=""){
+/*	
+	const textINPUT = document.getElementById('INPUT').value;
+    if(textINPUT!=""){
         query = query.replace( '?INPUT', '"'+textINPUT+'"@ja' );
+		document.getElementById('query_area2').value=query; //置換後のクエリを保存
     }
+*/
+/*
+	const textYEAR = document.getElementById('YEAR').value;
 	if(textYEAR!=""){
         query = query.replace( '#FILTER(?p571 >= "####-01-01T00:00:00Z"^^xsd:dateTime)', 
 								'FILTER(?p571 >= "'+textYEAR+'-01-01T00:00:00Z"^^xsd:dateTime)' );
+		document.getElementById('query_area2').value=query; //置換後のクエリを保存
     }
-	document.getElementById('query_area2').value=query; //置換後のクエリを保存
 */
 
+	//名称の検索にWikidataのAPIを使用する際は下記のコメントを外す
+/*	
     const textLABEL = document.getElementById('LABEL').value;
     if(textLABEL!=""){
         const ids = await getWdIDs(textLABEL);
-        //alert(ids.join(" ").replaceAll("Q","wd:Q"));
         const vals = ids.join(" ").replaceAll("Q","wd:Q"); 
-        //alert(vals);
         query = query.replace("#VALUES",'VALUES ?s {'+vals+'}');
-        // options = options.replace('#INPUT#',textLABEL);
         document.getElementById('query_area2').value = query;
     }  
+*/
+
     //SPARQLクエリの実行
 	document.getElementById('result_box').style.display="flex";
-    resultArea.innerHTML="<h2>検索中...</h2>";
-
+	showSearchIng(resultArea);
+    
 	const resultData = await sendSPARQLQuery(endpoint, query);
     
 	document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');
@@ -90,12 +96,16 @@ async function makeWikidataQuery(){
     // const endpoint ="https://www.wikidata.org/w/api.php";
 	
 	const textLABEL = document.getElementById('LABEL').value;
+	if(textLABEL==""){
+		alert("検索キーワードを入力してください");
+		return;
+	}
 	const endpoint ="https://www.wikidata.org/w/api.php";
     const options ="?action=wbsearchentities&search="+textLABEL+"&language=en&limit=50&format=json";
 	document.getElementById('query_area2').value = options;
 
     document.getElementById('result_box').style.display="flex";
-    resultArea.innerHTML="<h2>検索中...</h2>";
+    showSearchIng(resultArea);
 
     const resultData = await sendWdQuery(endpoint,options);
     document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');  
@@ -117,10 +127,14 @@ async function makeWikidataQuery(){
 	<div style="margin-top:4px;">
 		<!-- 検索条件を設定するには下記のコメントを外す  -->
 		 <b>検索条件の設定：</b>:<br>
-			名称（例：大阪電気）：<input id="LABEL" type="text" value="" autocomplete="off" size="40"/><br>
-		<!--	所在地（例：寝屋川市，大阪府）：<input id="INPUT" type="text" value="" autocomplete="off" size="40"/><br>
-			設立年（XXXX年以降，1990）：<input id="YEAR" type="text" value="" autocomplete="off" size="40"/><br>
-		<hr> -->
+			名称（例：大阪電気，大阪）：
+			<input id="LABEL" type="text" value="" autocomplete="off" size="40"/><br>
+		<!--所在地（例：寝屋川市，大阪府）：
+			<input id="INPUT" type="text" value="" autocomplete="off" size="40"/><br>-->
+		<!--設立年（XXXX年以降，1990）：
+			<input id="YEAR" type="text" value="" autocomplete="off" size="40"/><br>-->
+		<hr> 
+		<!-- 下記の「クエリの表示・非表示」ボタンは，必要がなければコメントアウトしてもよい  -->
 		<input type="button" id="dis_b" value="クエリの表示"
 			onclick="document.getElementById('query').style.display = 'block';
 			document.getElementById('dis_b').style.display = 'none';
@@ -142,18 +156,20 @@ select DISTINCT ?s ?sLabel ?p131Label ?p17Label ?p18 ?p856 ?p571
 where{
 	#VALUES #Wikidata APIで検索したIDとの置き換え用
 	?s wdt:P31/wdt:P279* wd:Q3918 ;
-		wdt:P17 wd:Q17;
-		wdt:P131/rdfs:label|wdt:P131/wdt:P131/rdfs:label ?INPUT;
-		#rdfs:label ?LABEL;
+		wdt:P17 wd:Q17; #国（wdt:P17）を日本（wd:Q17）に限定
+		wdt:P131/rdfs:label|wdt:P131/wdt:P131/rdfs:label ?INPUT; #所在地（wdt:P131）
 		wdt:P131 ?p131;
 		wdt:P17 ?p17;
-		wdt:P18 ?p18;
-		wdt:P856 ?p856;
 		wdt:P571 ?p571.
+		OPTIONAL{
+			?s wdt:P18 ?p18;
+				wdt:P856 ?p856.
+		}
+	#?s rdfs:label ?LABEL.
 	#FILTER(contains(?LABEL,"#LBL#"))
-	#FILTER(?p571 >= "####-01-01T00:00:00Z"^^xsd:dateTime)
+	#FILTER(?p571 >= "2000-01-01T00:00:00Z"^^xsd:dateTime)
 	SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
-}LIMIT 10	
+}LIMIT 50		
 </textarea>
 <br>
 置き換え後のクエリ：<br>
