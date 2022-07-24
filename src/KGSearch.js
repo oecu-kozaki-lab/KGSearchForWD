@@ -15,13 +15,31 @@ function sendQuery(endpoint, sparql) {
 	});
 }
 
+/*
+ * endpointで指定されたSPARQLエンドポイントにクエリを送信
+ */
+async function sendSPARQLQuery(endpoint,options){
+    try {
+		const result = await sendQuery(endpoint,options);
+        if (!result.ok) {
+			console.log("クエリエラーが発生しました");
+            return;
+        }		
+        const resultData = await result.json();	
+        console.log(resultData);
+
+		return resultData;
+    } catch (e) {
+            alert(e.message);
+        throw e;
+    }
+}
+
 
 /*
  * GETでAPIにクエリ送信
  */
 function sendGetQuery(endpoint, options) {
-	//var url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&search=大阪&language=en&limit=50&format=json&origin=*";
-		
 	var url = endpoint + options +"&origin=*";
 
 	const headers = {
@@ -33,6 +51,55 @@ function sendGetQuery(endpoint, options) {
 		cache: 'no-cache',
   	});
 }
+
+
+//WikiMedia APIを使ってIDを取得
+async function sendWdQuery(endpoint,options){
+    try {
+		const result = await sendGetQuery(endpoint,options);
+        if (!result.ok) {
+			console.log("クエリエラーが発生しました");
+            return;
+        }		
+        const resultData = await result.json();	
+        console.log(resultData);
+
+		return resultData;
+    } catch (e) {
+            alert(e.message);
+        throw e;
+    }
+}
+
+
+
+//WikiMedia APIを使ってIDを取得
+async function getWdIDs(label){
+    const endpoint ="https://www.wikidata.org/w/api.php";
+    const options ="?action=wbsearchentities&search="+label+"&language=en&limit=50&format=json";
+
+    try {
+		const result = await sendGetQuery(endpoint,options);
+        if (!result.ok) {
+			console.log("クエリエラーが発生しました");
+            return;
+        }		
+        const resultData = await result.json();	
+        console.log(resultData);
+
+		const data = resultData.search;
+		let ids = new Array();
+		for(let i = 0; i < data.length; i++){
+			ids.push(data[i].id);
+		}
+		return ids;
+    } catch (e) {
+            alert(e.message);
+        throw e;
+    }
+}
+
+
 
 /*
  * クエリ結果の表示【テーブル表示用】
