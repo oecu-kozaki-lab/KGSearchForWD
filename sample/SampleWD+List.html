@@ -21,8 +21,8 @@ window.addEventListener('load', async () => {
 
 	//検索実行ボタンの処理
 	sendButton.addEventListener('click', async () => {
-        //makeQuery();
-		makeWikidataQuery();
+        makeQuery();
+		//makeWikidataQuery();
 	}, false);
 
     //パラメータ(?key=XXXX)を使ったアクセスの処理
@@ -31,8 +31,8 @@ window.addEventListener('load', async () => {
         document.getElementById('QID').value = decodeURI(param.replace("?key=",""));
         document.getElementById('head').style.display = 'none';
         document.getElementById('menu').style.display = 'none';
-		//makeQuery();
-		makeWikidataQuery();
+		makeQuery();
+		//makeWikidataQuery();
     }
 
 }, false);

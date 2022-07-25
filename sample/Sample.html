@@ -13,16 +13,16 @@
 
 <script>
 //詳細表示ページ用の設定
-const keylink = "key";	//リンクのkeyとする変数
-const detail_html = "details.html"; //詳細表示用のHTMLファイル
+const keylink = "s";	//リンクのkeyとする変数
+const detail_html = "SampleDetails.html"; //詳細表示用のHTMLファイル
 
 window.addEventListener('load', async () => {
 	const sendButton = document.getElementById('send');
 
 	//検索実行ボタンの処理
 	sendButton.addEventListener('click', async () => {
-        //makeQuery();
-		makeWikidataQuery();
+        makeQuery();
+		//makeWikidataQuery();
 	}, false);
 
     //パラメータ(?key=XXXX)を使ったアクセスの処理
@@ -48,24 +48,23 @@ async function makeQuery(){
     if(textLABEL!=""){
         query = query.replace( '#FILTER(contains(?LABEL,"#LBL#"))', 
 								'FILTER(contains(?LABEL,"'+textLABEL+'"))' )
-					.replace('#rdfs:label ?LABEL;','rdfs:label ?LABEL;');
+					.replace('#?s rdfs:label ?LABEL.','?s rdfs:label ?LABEL.');
 		document.getElementById('query_area2').value=query; //置換後のクエリを保存
     }*/
-/*	
+	
 	const textINPUT = document.getElementById('INPUT').value;
     if(textINPUT!=""){
         query = query.replace( '?INPUT', '"'+textINPUT+'"@ja' );
 		document.getElementById('query_area2').value=query; //置換後のクエリを保存
     }
-*/
-/*
-	const textYEAR = document.getElementById('YEAR').value;
+
+    const textYEAR = document.getElementById('YEAR').value;
 	if(textYEAR!=""){
         query = query.replace( '#FILTER(?p571 >= "####-01-01T00:00:00Z"^^xsd:dateTime)', 
 								'FILTER(?p571 >= "'+textYEAR+'-01-01T00:00:00Z"^^xsd:dateTime)' );
 		document.getElementById('query_area2').value=query; //置換後のクエリを保存
     }
-*/
+
 
 	//名称の検索にWikidataのAPIを使用する際は下記のコメントを外す
 	
@@ -126,13 +125,13 @@ async function makeWikidataQuery(){
 <div id="menu" class="container">
 	<div style="margin-top:4px;">
 		<!-- 検索条件を設定するには下記のコメントを外す  -->
-		 <b>検索条件の設定</b>:<br>
+		 <b>検索条件の設定：</b>:<br>
 			名称（例：大阪電気，大阪）：
 			<input id="LABEL" type="text" value="" autocomplete="off" size="40"/><br>
-		<!--所在地（例：寝屋川市，大阪府）：
-			<input id="INPUT" type="text" value="" autocomplete="off" size="40"/><br>-->
-		<!--設立年（XXXX年以降，1990）：
-			<input id="YEAR" type="text" value="" autocomplete="off" size="40"/><br>-->
+		    所在地（例：寝屋川市，大阪府）：
+			<input id="INPUT" type="text" value="" autocomplete="off" size="40"/><br>
+		    設立年（XXXX年以降，1990）：
+			<input id="YEAR" type="text" value="" autocomplete="off" size="40"/><br>
 		<hr> 
 		<!-- 下記の「クエリの表示・非表示」ボタンは，必要がなければコメントアウトしてもよい  -->
 		<input type="button" id="dis_b" value="クエリの表示"
@@ -158,7 +157,6 @@ where{
 	?s wdt:P31/wdt:P279* wd:Q3918 ;
 		wdt:P17 wd:Q17; #国（wdt:P17）を日本（wd:Q17）に限定
 		wdt:P131/rdfs:label|wdt:P131/wdt:P131/rdfs:label ?INPUT; #所在地（wdt:P131）
-		#rdfs:label ?LABEL;
 		wdt:P131 ?p131;
 		wdt:P17 ?p17;
 		wdt:P571 ?p571.
@@ -166,8 +164,9 @@ where{
 			?s wdt:P18 ?p18;
 				wdt:P856 ?p856.
 		}
+	#?s rdfs:label ?LABEL.
 	#FILTER(contains(?LABEL,"#LBL#"))
-	#FILTER(?p571 >= "2000-01-01T00:00:00Z"^^xsd:dateTime)
+	#FILTER(?p571 >= "####-01-01T00:00:00Z"^^xsd:dateTime)
 	SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
 }LIMIT 50		
 </textarea>
@@ -186,11 +185,11 @@ where{
 
 <!-- 結果表示用の領域 -->
 <div id="result_box" style=" display: none;  ">
-	<div id="result_div"  class="container" style="flex: 1; "></div>
+	<div id="result_div"  class="container" style="flex: 1;"></div>
 	<!-- 詳細表示画面を使用するときは，この下のコメントアウトを外す -->
-	<!-- <div id="details_div" style="width: 300px; ">
-		<iframe src="" name="details"></iframe>
-	</div> -->
+	<div id="details_div" >
+		<iframe src="" name="details"style="width: 340px; height: 600px;"></iframe>
+	</div>
 </div>
 <hr>
 </body>

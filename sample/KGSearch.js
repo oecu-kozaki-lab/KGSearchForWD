@@ -200,7 +200,7 @@ function showResultDetails(resultData,resultArea){
 	}
 
 	//表示するプロパティの順番を設定
-	const props = ["P17","P131","P18","P856","P571"];
+	const props = ["P31","P279","P17","P131","P18","P856","P571"];
 	const propLen = props.length;
 	
 	for(let j=0 ;j<propLen;j++){	

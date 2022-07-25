@@ -14,7 +14,7 @@
 <script>
 //詳細表示ページ用の設定
 const keylink = "key";	//リンクのkeyとする変数
-const detail_html = "details.html"; //詳細表示用のHTMLファイル
+const detail_html = "SampleDetails.html"; //詳細表示用のHTMLファイル
 
 window.addEventListener('load', async () => {
 	const sendButton = document.getElementById('send');
@@ -119,8 +119,8 @@ async function makeWikidataQuery(){
     const resultData = await sendWdQuery(endpoint,options);
     document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');  
     
-    showWdResult(resultData,resultArea); 
-	//showWdResultWithLink(resultData,resultArea); //詳細表示との連携用
+    //showWdResult(resultData,resultArea); 
+	showWdResultWithLink(resultData,resultArea); //詳細表示との連携用
 }
 
 </script>
