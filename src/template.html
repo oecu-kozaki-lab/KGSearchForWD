@@ -167,7 +167,7 @@ PREFIX wikibase: <http://wikiba.se/ontology#>
 select DISTINCT ?s ?sLabel 
 where{
 	#VALUES #Wikidata APIで検索したIDとの置き換え用
-	?s wdt:P31/wdt:P279* wd:Q2405480. #声優 wd:Q3918 #大学.
+	?s wdt:P31/wdt:P279* wd:Q3918 #大学.
 	#?s rdfs:label ?LABEL.
 	#FILTER(contains(?LABEL,"#LBL#"))
 	#FILTER(?p571 >= "####-01-01T00:00:00Z"^^xsd:dateTime)
