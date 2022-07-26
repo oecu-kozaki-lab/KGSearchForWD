@@ -32,8 +32,8 @@ async function sendSPARQLQuery(endpoint,options){
     try {
 		const result = await sendQuery(endpoint,options);
         if (!result.ok) {
-			console.log("クエリエラーが発生しました");
-            return;
+			alert("クエリエラーが発生しました");
+            return null;
         }		
         const resultData = await result.json();	
         console.log(resultData);
@@ -68,8 +68,8 @@ async function sendWdQuery(endpoint,options){
     try {
 		const result = await sendGetQuery(endpoint,options);
         if (!result.ok) {
-			console.log("クエリエラーが発生しました");
-            return;
+			alert("クエリエラーが発生しました");
+            return null;
         }		
         const resultData = await result.json();	
         console.log(resultData);
@@ -86,8 +86,34 @@ async function sendWdQuery(endpoint,options){
 //WikiMedia APIを使ってIDを取得
 async function getWdIDs(label){
     const endpoint ="https://www.wikidata.org/w/api.php";
-    const options ="?action=wbsearchentities&search="+label+"&language=en&limit=50&format=json";
+    const options //="?action=wbsearchentities&search="+label+"&language=en&limit=50&format=json";
+				  = "?action=query&list=search&srsearch="+label+"&srlimit=50&format=json";
+    try {
+		const result = await sendGetQuery(endpoint,options);
+        if (!result.ok) {
+			console.log("クエリエラーが発生しました");
+            return;
+        }		
+        const resultData = await result.json();	
+        console.log(resultData);
 
+		const data = resultData.query.search;
+		let ids = new Array();
+		for(let i = 0; i < data.length; i++){
+			// ids.push(data[i].id);
+			ids.push(data[i].title);			
+		}
+		return ids;
+    } catch (e) {
+            alert(e.message);
+        throw e;
+    }
+}
+
+//WikiMedia APIを使ってIDを取得
+async function getWdIDsBySE(label){
+    const endpoint ="https://www.wikidata.org/w/api.php";
+    const options ="?action=wbsearchentities&search="+label+"&language=en&limit=50&format=json";
     try {
 		const result = await sendGetQuery(endpoint,options);
         if (!result.ok) {
@@ -108,8 +134,6 @@ async function getWdIDs(label){
         throw e;
     }
 }
-
-
 
 /*
  * クエリ結果の表示【テーブル表示用】
@@ -192,17 +216,20 @@ function showResultDetails(resultData,resultArea){
 	const len = data.length;
 
 	let mesText = "" ;
-	if(data[0]['s']!=null){
-		mesText+='<h2 style="background:#afeeee">'+data[0]['sLabel'].value
-			+'<br><font size="3">（Wikidata ID:<a href="'+data[0]['s'].value +'">'
-            +data[0]['s'].value.replace('http://www.wikidata.org/entity/',"")
+	if(data[0]['item']!=null){
+		mesText+='<h2 style="background:#afeeee">'+data[0]['itemLabel'].value
+			+'<br><font size="3">（Wikidata ID:<a href="'+data[0]['item'].value +'" target="_blank">'
+            +data[0]['item'].value.replace('http://www.wikidata.org/entity/',"")
             +'</a>）</font></h2>';
 	}
 
 	//表示するプロパティの順番を設定
-	const props = ["P31","P279","P17","P131","P18","P856","P571"];
+	const props = ["http://www.w3.org/2000/01/rdf-schema#label",
+					"http://www.w3.org/2004/02/skos/core#altLabel",
+					"http://schema.org/description",
+					"P31","P279","P17","P131","P18","P856","P571"];
 	const propLen = props.length;
-	
+
 	for(let j=0 ;j<propLen;j++){	
 		for(let i=0 ;i<len;i++){
 			if(data[i]['p'].value.endsWith(props[j])){	
@@ -251,10 +278,29 @@ function showData(data_i){
 						data_i['oLabel'].value+'<br>';
 			}
 		}
-	else{//wdt:XXX以外の述語の処理
-		mesText += data_i['p'].value+' - '+
-					data_i['oLabel'].value+'</a><br>';
-	}
+		else if(data_i['p'].value.startsWith('http://www.wikidata.org/prop/direct-normalized/')){
+			if(data_i['o'].value.startsWith('http')){//目的語がURL
+				mesText += data_i['p'].value.replace('http://www.wikidata.org/prop/direct-normalized/','wdtn:')+' - '+
+							'<a href="'+data_i['o'].value +'" target="_blank">'+
+							data_i['oLabel'].value+'</a><br>';
+			}
+			else{
+				mesText += data_i['p'].value+' - '+	data_i['oLabel'].value+'</a><br>';
+			}
+		}
+		else if(data_i['p'].value=="http://www.w3.org/2000/01/rdf-schema#label"){
+			mesText += '名前 - '+ data_i['oLabel'].value+'</a><br>';
+		}
+		else if(data_i['p'].value=="http://www.w3.org/2004/02/skos/core#altLabel"){
+			mesText += '別名 - '+ data_i['oLabel'].value+'</a><br>';
+		}
+		else if(data_i['p'].value=="http://schema.org/description"){
+			mesText += '説明 - '+ data_i['oLabel'].value+'</a><br>';
+		}
+		else{//wdt:XXX以外の述語の処理
+			mesText += data_i['p'].value+' - '+
+						data_i['oLabel'].value+'</a><br>';
+		}
 
 	//フォーマット調整
 	mesText = mesText.replace('-01-01T00:00:00Z','');//日付について「年のみ」の場合は不要部分を削除

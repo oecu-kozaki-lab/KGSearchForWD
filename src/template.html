@@ -13,7 +13,7 @@
 
 <script>
 //詳細表示ページ用の設定
-const keylink = "key";	//リンクのkeyとする変数
+const keylink = "item";	//リンクのkeyとする変数
 const detail_html = "details.html"; //詳細表示用のHTMLファイル
 
 window.addEventListener('load', async () => {
@@ -48,7 +48,7 @@ async function makeQuery(){
     if(textLABEL!=""){
         query = query.replace( '#FILTER(contains(?LABEL,"#LBL#"))', 
 								'FILTER(contains(?LABEL,"'+textLABEL+'"))' )
-					.replace('#?s rdfs:label ?LABEL.','?s rdfs:label ?LABEL.');
+					.replace('#?item rdfs:label ?LABEL.','?item rdfs:label ?LABEL.');
 		document.getElementById('query_area2').value=query; //置換後のクエリを保存
     }
 /*	
@@ -82,7 +82,7 @@ async function makeQuery(){
     if(textLABEL!=""){
         const ids = await getWdIDs(textLABEL);
         const vals = ids.join(" ").replaceAll("Q","wd:Q"); 
-        query = query.replace("#VALUES",'VALUES ?s {'+vals+'}');
+        query = query.replace("#VALUES",'VALUES ?item {'+vals+'}');
         document.getElementById('query_area2').value = query;
     }  
 */
@@ -164,11 +164,11 @@ PREFIX wd: <http://www.wikidata.org/entity/>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX wikibase: <http://wikiba.se/ontology#>
 	
-select DISTINCT ?s ?sLabel 
+select DISTINCT ?item ?itemLabel 
 where{
 	#VALUES #Wikidata APIで検索したIDとの置き換え用
-	?s wdt:P31/wdt:P279* wd:Q3918 #大学.
-	#?s rdfs:label ?LABEL.
+	?item wdt:P31/wdt:P279* wd:Q3918 #大学.
+	#?item rdfs:label ?LABEL.
 	#FILTER(contains(?LABEL,"#LBL#"))
 	#FILTER(?p571 >= "####-01-01T00:00:00Z"^^xsd:dateTime)
 	SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
@@ -181,11 +181,11 @@ PREFIX wd: <http://www.wikidata.org/entity/>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX wikibase: <http://wikiba.se/ontology#>
     
-select DISTINCT ?s ?sLabel ?o ?oLabel ?p ?prop ?propLabel
+select DISTINCT ?item ?itemLabel ?o ?oLabel ?p ?prop ?propLabel
 where{
-    BIND(?QID AS ?s)
-    ?s wdt:P31/wdt:P279* wd:Q3918 .
-    ?s ?p ?o.
+    BIND(?QID AS ?item)
+    ?item wdt:P31/wdt:P279* wd:Q3918 .
+    ?item ?p ?o.
     FILTER(?p=wdt:P131
         || ?p=wdt:P17
         || ?p=wdt:P18
