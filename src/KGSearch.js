@@ -172,11 +172,11 @@ function showResult(resultData,resultArea){
 
 function getHtmlData(val){
 	if(val.startsWith('http://www.wikidata.org/entity/')){//wd:XX
-		return '<a href="'+val + '" target="_blank">'+
+		return '<a href="'+val.replace('http://','https://') + '" target="_blank">'+
 			'wd:'+val.replace('http://www.wikidata.org/entity/','')+'</a>';
 	}
 	else if(val.startsWith('http://www.wikidata.org/prop/direct/')){//wdt:XX
-		return '<a href="'+val + '" target="_blank">'+
+		return '<a href="'+val.replace('http://','https://') + '" target="_blank">'+
 			'wdt:'+val.replace('http://www.wikidata.org/prop/direct/','')+'</a>';
 	}
 	else if(val.startsWith('http')){//URL
@@ -187,7 +187,7 @@ function getHtmlData(val){
 				return '<img src="'+val +'" width="100"/>';
 		}
 		else{
-			return '<a href="'+val +'" target="_blank">'+val+'</a>';
+			return '<a href="'+val.replace('http://','https://') +'" target="_blank">'+val+'</a>';
 		}
 	}
 		
@@ -208,100 +208,144 @@ function getLinkURL(val){
     }
 }
 
-
 /*
  * クエリ結果の表示処理[指定したデータの詳細表示用]
  */
-function showResultDetails(resultData,resultArea){
+function showResultDetails(resultData,resultArea,props){
+	//表示するプロパティの順番を設定
+	//const props = ["P17","P131","P18","P856","P571"];
+	const propLen = props.length;
+	
 	const data = resultData.results.bindings;
 	const len = data.length;
 
-	let mesText = "" ;
+	//ラベル,説明,上位クラス
+	let labelText = "";
+	let altLabelText = "";
+	let descText = "";
+	let subCls = "";
+	let insOf = "";
+	
+	//順番を指定したプロパティ用
+	let texts = [];
+	for(let j=0 ;j<propLen;j++){
+		texts.push('');
+	}
+
+	//その他用
+	let otherText = "";
+	
+	//見出し語部分
 	if(data[0]['item']!=null){
-		mesText+='<h2 style="background:#afeeee">'+data[0]['itemLabel'].value
-			+'<br><font size="3">（Wikidata ID:<a href="'+data[0]['item'].value +'" target="_blank">'
+		labelText += '<h2 style="background:#afeeee">'+data[0]['itemLabel'].value
+			+'<br><font size="3">（Wikidata ID:<a href="'+data[0]['item'].value.replace('http://','https://')
+			+'" target="_blank">'
             +data[0]['item'].value.replace('http://www.wikidata.org/entity/',"")
             +'</a>）</font></h2>';
 	}
 
-	//表示するプロパティの順番を設定
-	const props = ["http://www.w3.org/2000/01/rdf-schema#label",
-					"http://www.w3.org/2004/02/skos/core#altLabel",
-					"http://schema.org/description",
-					"P31","P279","P17","P131","P18","P856","P571"];
-	const propLen = props.length;
-
-	for(let j=0 ;j<propLen;j++){	
-		for(let i=0 ;i<len;i++){
-			if(data[i]['p'].value.endsWith(props[j])){	
-				mesText += showData(data[i]);
+	for(let i=0 ;i<len;i++){
+		if(data[i]['p'].value.endsWith("rdf-schema#label")){
+			labelText += showData(data[i]);
+		}
+		else if(data[i]['p'].value.endsWith("core#altLabel")){
+			altLabelText += showData(data[i]);
+		}
+		else if(data[i]['p'].value.endsWith("schema.org/description")){
+			descText += showData(data[i]);
+		}
+		else if(data[i]['p'].value.endsWith("P279")){
+			subCls += showData(data[i]);
+		}
+		else if(data[i]['p'].value.endsWith("P31")){
+			insOf += showData(data[i]);
+		}
+		else{
+			let sw = true;
+			for(let j=0 ;j<propLen;j++){
+				if(data[i]['p'].value.endsWith(props[j])){	
+					texts[j] += showData(data[i]);
+					sw = false;
+					break;
+				}
+			}
+			if(sw){
+				otherText += showData(data[i]);
 			}
 		}
-    }
-	//順番を指定していないプロパティの表示
-	for(let i=0 ;i<len;i++){
-		if(props.indexOf(data[i]['p'].value.replace("http://www.wikidata.org/prop/direct/",""))<0){	
-			//console.log(data[i]['p'].value);
-			mesText += showData(data[i]);
-		}
 	}
+
+	let mesText = labelText + altLabelText  + descText +"<hr>";
+	if(""!=(subCls+insOf)){
+		mesText += subCls + insOf +"<hr>";
+	}
+
+	let propText = "";
+	for(let j=0 ;j<propLen;j++){
+		propText += texts[j];
+	}
+	if(propText!=""){
+		mesText += propText +"<hr>";	
+	}
+	mesText += otherText;
 	
 	resultArea.innerHTML = mesText;
 }
 
+
+
 function showData(data_i){
 	var mesText = "" ;
 	if(data_i['propLabel']!=null){//wdt:XXXの述語処理
-			if(data_i['o'].value.startsWith('http://www.wikidata.org/entity/')){//目的語がwd:XX
-				const qid ='wd:'+data_i['o'].value.replace('http://www.wikidata.org/entity/','');
-				mesText += data_i['propLabel'].value+' - <b>'+
-						data_i['oLabel'].value + '</b>' +
-						'<a href="'+detail_html+'?key='+qid+ '">'+
-						'['+qid+']</a><br>';
-			}
-			else if(data_i['o'].value.startsWith('http')){//目的語がURL
-                if(data_i['o'].value.endsWith('.jpg')
-					|| data_i['o'].value.endsWith('.JPG')
-					|| data_i['o'].value.endsWith('.png')
-					|| data_i['o'].value.endsWith('.svg')){
-                    mesText += data_i['propLabel'].value+'<br>'+
-						'<img src="'+data_i['o'].value +'" width="300">'+
-						'</img><br>';
-                }
-                else{
-				    mesText += data_i['propLabel'].value+' - '+
-						'<a href="'+data_i['o'].value +'" target="_blank">'+
-						data_i['oLabel'].value+'</a><br>';
-                    }
-			}
-            else{//目的語がそれ以外
-				mesText += data_i['propLabel'].value+' - '+
-						data_i['oLabel'].value+'<br>';
-			}
+		const prop = data_i['propLabel'].value
+		             +'['+ data_i['prop'].value.replace('http://www.wikidata.org/entity/','') +']';
+		
+		if(data_i['o'].value.startsWith('http://www.wikidata.org/entity/')){//目的語がwd:XX
+			const qid ='wd:'+data_i['o'].value.replace('http://www.wikidata.org/entity/','');
+			mesText += prop +' - <b>'+ data_i['oLabel'].value + '</b>' +
+					'<a href="'+detail_html+'?key='+qid+ '">'+
+					'['+qid+']</a><br>';
 		}
-		else if(data_i['p'].value.startsWith('http://www.wikidata.org/prop/direct-normalized/')){
-			if(data_i['o'].value.startsWith('http')){//目的語がURL
-				mesText += data_i['p'].value.replace('http://www.wikidata.org/prop/direct-normalized/','wdtn:')+' - '+
-							'<a href="'+data_i['o'].value +'" target="_blank">'+
-							data_i['oLabel'].value+'</a><br>';
+		else if(data_i['o'].value.startsWith('http')){//目的語がURL
+			if(data_i['o'].value.endsWith('.jpg')
+				|| data_i['o'].value.endsWith('.JPG')
+				|| data_i['o'].value.endsWith('.png')
+				|| data_i['o'].value.endsWith('.svg')){
+				mesText += prop +'<br>' + '<img src="'+data_i['o'].value +'" width="300">'+'</img><br>';
 			}
 			else{
-				mesText += data_i['p'].value+' - '+	data_i['oLabel'].value+'</a><br>';
-			}
+				mesText += prop +' - '+'<a href="'+data_i['o'].value.replace('http://','https://') 
+				        +'" target="_blank">'+ data_i['oLabel'].value+'</a><br>';
+				}
 		}
-		else if(data_i['p'].value=="http://www.w3.org/2000/01/rdf-schema#label"){
-			mesText += '名前 - '+ data_i['oLabel'].value+'</a><br>';
+		else{//目的語がそれ以外
+			mesText += prop +' - '+	data_i['oLabel'].value+'<br>';
 		}
-		else if(data_i['p'].value=="http://www.w3.org/2004/02/skos/core#altLabel"){
-			mesText += '別名 - '+ data_i['oLabel'].value+'</a><br>';
-		}
-		else if(data_i['p'].value=="http://schema.org/description"){
-			mesText += '説明 - '+ data_i['oLabel'].value+'</a><br>';
-		}
-		else{//wdt:XXX以外の述語の処理
-			mesText += data_i['p'].value+' - '+
+	}
+	else if(data_i['p'].value.startsWith('http://www.wikidata.org/prop/direct-normalized/')){
+		if(data_i['o'].value.startsWith('http')){//目的語がURL
+			mesText += data_i['p'].value.replace('http://www.wikidata.org/prop/direct-normalized/','wdtn:')+' - '+
+						'<a href="'+data_i['o'].value.replace('http://','https://') 
+						+'" target="_blank">'+
 						data_i['oLabel'].value+'</a><br>';
 		}
+		else{
+			mesText += data_i['p'].value+' - '+	data_i['oLabel'].value+'</a><br>';
+		}
+	}
+	else if(data_i['p'].value=="http://www.w3.org/2000/01/rdf-schema#label"){
+		mesText += '名前 - '+ data_i['oLabel'].value+'<br>';
+	}
+	else if(data_i['p'].value=="http://www.w3.org/2004/02/skos/core#altLabel"){
+		mesText += '別名 - '+ data_i['oLabel'].value+'<br>';
+	}
+	else if(data_i['p'].value=="http://schema.org/description"){
+		mesText += '説明 - '+ data_i['oLabel'].value+'<br>';
+	}
+	else{//wdt:XXX以外の述語の処理
+		mesText += data_i['p'].value+' - '+
+					data_i['oLabel'].value+'<br>';
+	}
 
 	//フォーマット調整
 	mesText = mesText.replace('-01-01T00:00:00Z','');//日付について「年のみ」の場合は不要部分を削除
