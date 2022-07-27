@@ -92,7 +92,8 @@ async function makeQuery(){
     
 	document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');
     //showResult(resultData,resultArea); //クエリ結果の表示【テーブル表示用】
-    showResultDetails(resultData,resultArea); //クエリ結果の表示【詳細表示用】
+    const props = ["P17","P131","P18","P856","P571"];
+    showResultDetails(resultData,resultArea,props); //クエリ結果の表示【詳細表示用】
 
 }
 //Wikidata ID の検索を実行する

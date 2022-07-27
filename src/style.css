@@ -24,7 +24,7 @@ header > h1 {
 .result_div {
   /* width: 300px; */
   height: 80vh;
-  border: solid 1px;
+  /* border: solid 1px; */
   overflow: auto;
   text-align: left;
 }

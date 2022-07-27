@@ -214,10 +214,17 @@ function getLinkURL(val){
 function showResultDetails(resultData,resultArea,props){
 	//表示するプロパティの順番を設定
 	//const props = ["P17","P131","P18","P856","P571"];
-	const propLen = props.length;
-	
+	let propLen = 0;
+	if(props!=null){
+		propLen = props.length;	
+	} 
 	const data = resultData.results.bindings;
 	const len = data.length;
+
+	if(len==0){
+		resultArea.innerHTML = "検索結果なし";
+		return;
+	}
 
 	//ラベル,説明,上位クラス
 	let labelText = "";

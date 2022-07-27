@@ -21,6 +21,14 @@ header > h1 {
     border: solid 1px #ccc;
 }
 
+.result_div {
+  /* width: 300px; */
+  height: 80vh;
+  border: solid 1px;
+  overflow: auto;
+  text-align: left;
+}
+
 table {
 	/* width: 100%; */
 	table-layout: fixed;
