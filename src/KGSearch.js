@@ -110,7 +110,8 @@ async function getWdIDs(label){
     }
 }
 
-//WikiMedia APIを使ってIDを取得
+//WikiMedia APIを使ってIDを取得【wbsearchentities】
+//こちらは「前方一致」のみ？
 async function getWdIDsBySE(label){
     const endpoint ="https://www.wikidata.org/w/api.php";
     const options ="?action=wbsearchentities&search="+label+"&language=en&limit=50&format=json";
@@ -252,11 +253,11 @@ function showData(data_i){
 	var mesText = "" ;
 	if(data_i['propLabel']!=null){//wdt:XXXの述語処理
 			if(data_i['o'].value.startsWith('http://www.wikidata.org/entity/')){//目的語がwd:XX
+				const qid ='wd:'+data_i['o'].value.replace('http://www.wikidata.org/entity/','');
 				mesText += data_i['propLabel'].value+' - <b>'+
 						data_i['oLabel'].value + '</b>' +
-						'<a href="'+data_i['o'].value + '" target="_blank">'+
-						'['+data_i['o'].value.replace('http://www.wikidata.org/entity/','')+
-						']</a><br>';
+						'<a href="'+detail_html+'?key='+qid+ '">'+
+						'['+qid+']</a><br>';
 			}
 			else if(data_i['o'].value.startsWith('http')){//目的語がURL
                 if(data_i['o'].value.endsWith('.jpg')
