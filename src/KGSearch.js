@@ -86,7 +86,7 @@ async function sendWdQuery(endpoint,options){
 //WikiMedia APIを使ってIDを取得
 async function getWdIDs(label){
     const endpoint ="https://www.wikidata.org/w/api.php";
-    const options //="?action=wbsearchentities&search="+label+"&language=en&limit=50&format=json";
+    const options //="?action=wbsearchentities&search="+label+"&limit=50&format=json";
 				  = "?action=query&list=search&srsearch="+label+"&srlimit=50&format=json";
     try {
 		const result = await sendGetQuery(endpoint,options);
