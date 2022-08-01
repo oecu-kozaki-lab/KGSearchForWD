@@ -43,17 +43,20 @@ async function makeQuery(){
     const resultArea = document.getElementById('result_div');
 	let query = document.getElementById('query_area').value;
 
-	//  検索条件を設定するには下記のコメントを外す 
-	//名称の検索にWikidataのAPIを使用する際は下記のコメントを外す
-	
+	//検索条件の設定
+	let conditions = "{\n";
+
+    //名称の処理
     const textLABEL = document.getElementById('LABEL').value;
     if(textLABEL!=""){
         const ids = await getWdIDs(textLABEL);
+        // const ids = await getWdIDsBySE(textLABEL);//
         const vals = ids.join(" ").replaceAll("Q","wd:Q"); 
-        query = query.replace("#VALUES",'VALUES ?item {'+vals+'}');
-        document.getElementById('query_area2').value = query;
+        conditions+= 'VALUES ?item {'+vals+'}\n';
     }  
-
+	
+	query = query.replace("{",conditions);
+    document.getElementById('query_area2').value = query;
 
     //SPARQLクエリの実行
 	document.getElementById('result_box').style.display="flex";
@@ -103,11 +106,12 @@ async function makeWikidataQuery(){
 <div id="menu" class="container">
 	<div style="margin-top:4px;">
 		<!-- 検索条件を設定するには下記のコメントを外す  -->
-		 <b>検索条件の設定：</b>:<br>
+		 <!-- <b>検索条件の設定：</b>:<br> -->
 		 <!--Wikidata ID（例：wd:Q7105556）：
 			<input id="QID" type="text" value="wd:Q7105556" autocomplete="off" size="40"/><br> -->
-			名称（例：大阪電気，大阪）：
-			<input id="LABEL" type="text" value="" autocomplete="off" size="40"/><br>
+			<!-- 名称（例：大阪電気，大阪）： -->
+			<input id="LABEL" type="text" value="" autocomplete="off" size="40"/>
+			<input type="button" id="send" value="検索" style="margin-top:8px; "><br>
 		<!--所在地（例：寝屋川市，大阪府）：
 			<input id="INPUT" type="text" value="" autocomplete="off" size="40"/><br>-->
 		<!--設立年（XXXX年以降，1990）：
@@ -134,11 +138,6 @@ PREFIX wikibase: <http://wikiba.se/ontology#>
 	
 select DISTINCT ?item ?itemLabel 
 where{
-	#VALUES #Wikidata APIで検索したIDとの置き換え用
-	#?item wdt:P31/wdt:P279* wd:Q3918 #大学.
-	#?item rdfs:label ?LABEL.
-	#FILTER(contains(?LABEL,"#LBL#"))
-	#FILTER(?p571 >= "####-01-01T00:00:00Z"^^xsd:dateTime)
 	SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
 }LIMIT 50		
 </textarea>
@@ -152,7 +151,7 @@ where{
 </textarea>
 </div>
 
-<input type="button" id="send" value="検索の実行" style="margin-top:8px; ">
+
 </div>
 
 <!-- 結果表示用の領域 -->

@@ -127,7 +127,7 @@ where{
     BIND(?QID AS ?item)
     ?item ?p ?o.
     FILTER(
-    (isLiteral(?o)&&(lang(?o)="ja"))
+    (isLiteral(?o)&&((lang(?o)="ja")||(lang(?o)="")))
     ||(!isLiteral(?o)
 	    &&(!contains(str(?o),"http://www.wikidata.org/entity/statement/"))
 		)

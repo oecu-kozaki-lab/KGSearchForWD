@@ -23,10 +23,16 @@ header > h1 {
 
 .result_div {
   /* width: 300px; */
+  margin: 1em;
+  padding: 0;
   height: 80vh;
   /* border: solid 1px; */
   overflow: auto;
   text-align: left;
+}
+
+.cond {
+ display: none; 
 }
 
 table {

@@ -304,11 +304,11 @@ function showResultDetails(resultData,resultArea,props){
 function showData(data_i){
 	var mesText = "" ;
 	if(data_i['propLabel']!=null){//wdt:XXXの述語処理
-		const prop = data_i['propLabel'].value
-		             +'['+ data_i['prop'].value.replace('http://www.wikidata.org/entity/','') +']';
+		const prop = '<b>'+data_i['propLabel'].value + '</b>'
+		             +'['+ data_i['prop'].value.replace('http://www.wikidata.org/entity/','wdt:') +']';
 		
 		if(data_i['o'].value.startsWith('http://www.wikidata.org/entity/')){//目的語がwd:XX
-			const qid ='wd:'+data_i['o'].value.replace('http://www.wikidata.org/entity/','');
+			const qid = data_i['o'].value.replace('http://www.wikidata.org/entity/','wd:');
 			mesText += prop +' - <b>'+ data_i['oLabel'].value + '</b>' +
 					'<a href="'+detail_html+'?key='+qid+ '">'+
 					'['+qid+']</a><br>';
