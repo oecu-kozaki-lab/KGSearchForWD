@@ -180,10 +180,11 @@ function getHtmlData(val){
 			'wdt:'+val.replace('http://www.wikidata.org/prop/direct/','')+'</a>';
 	}
 	else if(val.startsWith('http')){//URL
-		if(val.endsWith('.jpg')
-			|| val.endsWith('.JPG')
-			|| val.endsWith('.png')
-			|| val.endsWith('.svg')){
+		if(val.toUpperCase().match(/\.(jpg)$/i)
+			|| val.toUpperCase().match(/\.(png)$/i)
+			|| val.toUpperCase().match(/\.(jpeg)$/i)
+			|| val.toUpperCase().match(/\.(gif)$/i)
+			|| val.toUpperCase().match(/\.(svg)$/i)){
 				return '<img src="'+val +'" width="100"/>';
 		}
 		else{
@@ -317,7 +318,8 @@ function showData(data_i){
 			if(data_i['o'].value.endsWith('.jpg')
 				|| data_i['o'].value.endsWith('.JPG')
 				|| data_i['o'].value.endsWith('.png')
-				|| data_i['o'].value.endsWith('.svg')){
+				|| data_i['o'].value.endsWith('.svg')
+				|| data_i['o'].value.endsWith('.jpeg')){
 				mesText += prop +'<br>' + '<img src="'+data_i['o'].value +'" width="300">'+'</img><br>';
 			}
 			else{
