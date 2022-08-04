@@ -139,7 +139,7 @@ async function makeQuery(){
     //追加項目の処理
     const textOpt4 = document.getElementById('opt4').value;
     if(textOpt4!=""){
-        opt_select += '?opt4Label';
+        opt_select += ' ?opt4 ?opt4Label';
         if(document.getElementById('opt4_ck').checked){
             options += 'OPTIONAL{?item '+ textOpt4+' ?opt4 .}\n';
         }

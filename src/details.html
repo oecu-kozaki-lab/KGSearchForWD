@@ -15,6 +15,7 @@
 //詳細表示ページ用の設定
 const keylink = "item";	//リンクのkeyとする変数
 const detail_html = "details.html"; //詳細表示用のHTMLファイル
+const props = ["wdt:P17","wdt:P131","wdt:P625","wdt:P18","wdt:P856","wdt:P571"]; //表示するプロパティの順番
 
 window.addEventListener('load', async () => {
 	const sendButton = document.getElementById('send');
@@ -77,7 +78,7 @@ async function makeQuery(){
 	document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');
     //showResult(resultData,resultArea); //クエリ結果の表示【テーブル表示用】
 
-	const props = ["P17","P131","P18","P856","P571"]
+	
     showResultDetails(resultData,resultArea,props); //クエリ結果の表示【詳細表示用】
 }
 </script>
@@ -127,14 +128,15 @@ where{
     BIND(?QID AS ?item)
     ?item ?p ?o.
     FILTER(
-    (isLiteral(?o)&&((lang(?o)="ja")||(lang(?o)="")))
-    ||(!isLiteral(?o)
+    	(isLiteral(?o)&&((lang(?o)="ja")||(lang(?o)="")))
+    		||(!isLiteral(?o)
 	    &&(!contains(str(?o),"http://www.wikidata.org/entity/statement/"))
 		)
     )
+	#FILTER(contains(str(?p),"http://www.wikidata.org/prop/direct/"))
     OPTIONAL{?prop wikibase:directClaim ?p.}
     SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
-}ORDER BY ?p		
+}		
 </textarea>	
 
 <br>

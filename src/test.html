@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Wikidataを用いた検索システム</title>
+
+<link rel="stylesheet" href="style.css">
+<!-- KG検索用のライブラリ読み込み -->
+<script src="KGSearch.js"></script> 
+</head>
+
+<body>
+<header id="head" >
+	<h1>Wikidataを用いた検索システム</h1>
+</header>
+
+<!-- 結果表示用の領域 -->
+<div id="result_box">
+	<div>
+        <div id="result_div"  class="result_div" > <table>
+   
+            <h2 style="background:#afeeee">大阪電気通信大学<br><font size="3">（Wikidata ID:<a href="https://www.wikidata.org/entity/Q7105556" target="_blank">Q7105556</a>）</font></h2><table>
+                <tr>
+                    <td style="background:blue"><b>名前</b></td>
+                    <td>大阪電気通信大学</td>
+                </tr>
+                <tr><td style="background:#FFFFE0"><b>別名</b></td><td>OECU</td></tr><tr><td style="background:#FFFFE0"><b>別名</b></td><td>大阪電通大</td></tr><tr><td style="background:#FFFFE0"><b>説明</b></td><td>日本の私立大学</td></tr></table><hr>
+                
+                <table>
+                    <tr>
+                        <td style="background:red"><b>分類</b>[wdt:P31]</td>
+                        <td><b>大学</b><a href="details.html?key=wd:Q3918">[wd:Q3918]</a></td>
+                    </tr>
+                </table><hr>
+                <table><tr><td style="background:#FFFFE0"><b>国</b>[wdt:P17]</td><td><b>日本</b><a href="details.html?key=wd:Q17">[wd:Q17]</a></td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>位置する行政区画</b>[wdt:P131]</td><td><b>寝屋川市</b><a href="details.html?key=wd:Q389633">[wd:Q389633]</a></td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>位置座標</b>[wdt:P625]</td><td>Point(135.62694444 34.76027778)</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>画像</b>[wdt:P18]</td><td><img src="http://commons.wikimedia.org/wiki/Special:FilePath/OECU.jpg" width="300"></img></td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>公式ウェブサイト</b>[wdt:P856]</td><td><a href="https://www.osakac.ac.jp/" target="_blank">https://www.osakac.ac.jp/</a></td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>成立日</b>[wdt:P571]</td><td>1941-01-01T00:00:00Z</td></tr><br>
+                </table><hr>
+                <input type="button" id="show_other" value="▼すべて表示" onclick="showOther()"><input type="button" id="hide_other" style="display: none;" value="▲表示を減らす" onclick="hideOther()"><br><div id="other_prop" style="display: none;" ><tabel><tr><td style="background:#FFFFE0"><b>ISNI</b>[wdt:P213]</td><td>0000 0001 0659 9972</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>Facebook識別子</b>[wdt:P2013]</td><td>OECU.osakadentsudai</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>HAL structure ID</b>[wdt:P6773]</td><td>71778</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>Quoraトピック識別子</b>[wdt:P3417]</td><td>Osaka-Electro-Communication-University</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>主題の中心カテゴリ</b>[wdt:P910]</td><td><b>Category:大阪電気通信大学</b><a href="details.html?key=wd:Q9616315">[wd:Q9616315]</a></td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>世界研究識別子データベース識別子</b>[wdt:P2427]</td><td>grid.444451.4</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>Freebase識別子</b>[wdt:P646]</td><td>/m/041679x</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>コモンズのカテゴリ</b>[wdt:P373]</td><td>Osaka Electro-Communication University</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>VIAF識別子</b>[wdt:P214]</td><td>129613133</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>リングゴールド識別子</b>[wdt:P3500]</td><td>13004</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>WorldCat識別識別子</b>[wdt:P7859]</td><td>lccn-n84053097</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>国立国会図書館識別子</b>[wdt:P349]</td><td>00370288</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>ジャパンサーチ名称識別子</b>[wdt:P6698]</td><td>大阪電気通信大学</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>研究機関レジストリ識別子</b>[wdt:P6782]</td><td>056bksm23</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>大学・高等専門学校コード</b>[wdt:P7251]</td><td>2214</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>アメリカ議会図書館典拠管理識別子</b>[wdt:P244]</td><td>n84053097</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>Twitterのユーザー名</b>[wdt:P2002]</td><td>OECU_official</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>教育機関の卒業者のカテゴリ</b>[wdt:P3876]</td><td><b>Category:大阪電気通信大学出身の人物</b><a href="details.html?key=wd:Q18723747">[wd:Q18723747]</a></td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>ソーシャルメディアのフォロワー数</b>[wdt:P8687]</td><td>1781</td></tr><br>
+                <tr><td style="background:#FFFFE0"><b>Microsoft Academic識別子</b>[wdt:P6366]</td><td>189513530</td></tr><br>
+                </tabel>           
+
+
+
+        </div>
+        <input type="button" id="cont" value="続きを検索" >
+    </div>
+	<!-- <div id="result_div"  class="container" style="flex: 1;"></div> -->
+	<!-- 詳細表示画面を使用するときは，この下のコメントアウトを外す -->
+	<div id="details_div" >
+		<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>
+	</div>
+</div>
+<hr>
+</body>
+</html>

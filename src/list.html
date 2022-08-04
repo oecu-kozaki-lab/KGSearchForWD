@@ -24,6 +24,7 @@ window.addEventListener('load', async () => {
 	//検索実行ボタンの処理
 	sendButton.addEventListener('click', async () => {
         offset = 0;  
+        document.getElementById("result_div").innerHTML="";
         makeQuery();
 		//makeWikidataQuery();
 	}, false);
@@ -52,6 +53,8 @@ async function makeQuery(){
     const resultArea = document.getElementById('result_div');
 	let query = document.getElementById('query_area').value;
    
+    const delailsArea = document.getElementById('details_div');
+    delailsArea.innerHTML='<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>';
 
 	//  検索条件を設定するには下記のコメントを外す 
 	//名称の検索にWikidataのAPIを使用する際は下記のコメントを外す
@@ -156,10 +159,15 @@ async function makeQuery(){
 
     //SPARQLクエリの実行
 	document.getElementById('result_box').style.display="flex";
-	showSearchIng(resultArea);
-    
+	
+    //showSearchIng(resultArea);
+    dispLoading("検索中...");			
+
 	const resultData = await sendSPARQLQuery(endpoint, query);
     
+    removeLoading();
+
+
 	document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');
     showResult(resultData,resultArea); //クエリ結果の表示【テーブル表示用】
     //showResultDetails(resultData,resultArea); //クエリ結果の表示【詳細表示用】
