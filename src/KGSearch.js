@@ -87,7 +87,7 @@ async function sendWdQuery(endpoint,options){
 async function getWdIDs(label){
     const endpoint ="https://www.wikidata.org/w/api.php";
     const options //="?action=wbsearchentities&search="+label+"&limit=50&format=json";
-				  = "?action=query&list=search&srsearch="+label+"&srlimit=50&format=json";
+				  = "?action=query&list=search&srsearch="+label+"&srlimit=50&sroffset="+offset+"&format=json";
     try {
 		const result = await sendGetQuery(endpoint,options);
         if (!result.ok) {

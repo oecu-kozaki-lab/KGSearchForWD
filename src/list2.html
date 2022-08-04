@@ -15,14 +15,23 @@
 //詳細表示ページ用の設定
 const keylink = "item";	//リンクのkeyとする変数
 const detail_html = "details.html"; //詳細表示用のHTMLファイル
+let offset = 0; 
 
 window.addEventListener('load', async () => {
 	const sendButton = document.getElementById('send');
+    const contButton = document.getElementById('cont');
 
 	//検索実行ボタンの処理
 	sendButton.addEventListener('click', async () => {
+        offset = 0; 
         makeQuery();
 		//makeWikidataQuery();
+	}, false);
+
+    //続きを検索実行ボタンの処理
+	contButton.addEventListener('click', async () => {
+        offset += 50;
+        makeQuery();
 	}, false);
 
     //パラメータ(?key=XXXX)を使ったアクセスの処理
@@ -152,6 +161,12 @@ async function makeQuery(){
     showResult(resultData,resultArea); //クエリ結果の表示【テーブル表示用】
     //showResultDetails(resultData,resultArea); //クエリ結果の表示【詳細表示用】
 
+    if(resultData.results.bindings.length == 0){
+        console.log("検索結果がゼロのため「続き」を自動検索");
+        offset += 50;
+        makeQuery();
+    }
+
 }
 //Wikidata ID の検索を実行する　※こちらは廃止の方向で？
 async function makeWikidataQuery(){
@@ -254,7 +269,10 @@ where{
 
 <!-- 結果表示用の領域 -->
 <div id="result_box" style=" display: none;  ">
-	<div id="result_div"  class="result_div" ></div>
+	<div>
+        <div id="result_div"  class="result_div" > </div>
+        <input type="button" id="cont" value="続きを検索" >
+    </div>
 	<!-- <div id="result_div"  class="container" style="flex: 1;"></div> -->
 	<!-- 詳細表示画面を使用するときは，この下のコメントアウトを外す -->
 	<div id="details_div" >
