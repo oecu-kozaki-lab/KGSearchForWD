@@ -93,9 +93,16 @@ async function sendWdQuery(endpoint,options){
 
 //WikiMedia APIを使ってIDを取得
 async function getWdIDs(label){
+	return getWdIDsByWM(label,50);
+}
+
+async function getWdID(label){
+	return getWdIDsByWM(label,1);
+}
+async function getWdIDsByWM(label,limit){
     const endpoint ="https://www.wikidata.org/w/api.php";
     const options //="?action=wbsearchentities&search="+label+"&limit=50&format=json";
-				  = "?action=query&list=search&srsearch="+label+"&srlimit=50&sroffset="+offset+"&format=json";
+				  = "?action=query&list=search&srsearch="+label+"&srlimit="+limit+"&sroffset="+offset+"&format=json";
     try {
 		const result = await sendGetQuery(endpoint,options);
         if (!result.ok) {
@@ -162,7 +169,8 @@ function showResult(resultData,resultArea){
 	else{
 		mesText = "<table>\n<tr>" ;
 		for(let j = 0; j < keys.length; j++){
-			mesText+='<th style="background:#afeeee">'+keys[j]+'</th>';
+			mesText+='<th style="background:#afeeee">'
+					+getSearchPropLabel(keys[j]) +'</th>';
 		}
 		mesText+="</tr>\n";
 	}
@@ -185,6 +193,29 @@ function showResult(resultData,resultArea){
 		mesText+="</tr>";
 	}
 	resultArea.innerHTML = mesText+'</table>';
+}
+
+//検索結果表示用の「項目名」の取得
+function getSearchPropLabel(p){
+	if(search_prop==null){
+		return p;
+	}
+
+	if(p=='item'){
+		return "QID";
+	}
+	else if(p=='itemLabel'){
+		return "ラベル";
+	}
+
+	//optの処理
+	for(let i=0;i<search_prop.length;i++){
+		if(search_prop[i].id + "Label" == p){
+			return search_prop[i].pname; 
+		}
+	}
+
+	return p;
 }
 
 function getHtmlData(val){
@@ -443,6 +474,29 @@ function showWdResultWithLink(resultData,resultArea){
 		mesText+= data[i].match.text+"（" + getLinkURL(data[i].concepturi)+"）<br>\n";
 	}
 	resultArea.innerHTML = mesText;//+'</table>';
+}
+
+/*
+ * 検索表示項目の設定
+ */
+function loadSearchProps(propData){  
+	let propText = "";
+	for(let i=0;i<propData.length;i++){
+		let ck = "";
+		if(propData[i].optional){
+			ck ="checked";
+		}
+		propText += '項目名:<input type="text" id="'+propData[i].id + '_name" '
+				 +  'value="'+propData[i].pname+'" size="20"/>';
+		propText += ' ID:<input type="text" id="'+propData[i].id + '" '
+				 +  'value="'+propData[i].prop+'" size="20"/>';
+		propText += '<input type="checkbox" id="'+propData[i].id+'_ck" ' + ck +'><br>';
+	}
+
+	return propText;
+
+	// <input type="text" id="opt1" class="opt" value="wdt:P131" size="20"/>
+    // <input type="checkbox" id="opt1_ck"><br>
 }
 
 /* ------------------------------
