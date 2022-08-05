@@ -39,7 +39,7 @@ async function sendSPARQLQuery(endpoint,options){
     try {
 		const result = await sendQuery(endpoint,options);
         if (!result.ok) {
-			alert("クエリエラーが発生しました");
+			alert("SPARQLクエリのエラーが発生しました");
 			removeSearchIng();
             return null;
         }		
@@ -76,7 +76,7 @@ async function sendWdQuery(endpoint,options){
     try {
 		const result = await sendGetQuery(endpoint,options);
         if (!result.ok) {
-			alert("クエリエラーが発生しました");
+			alert("sendWdQueryでクエリエラーが発生しました");
             return null;
         }		
         const resultData = await result.json();	
@@ -99,7 +99,7 @@ async function getWdIDs(label){
     try {
 		const result = await sendGetQuery(endpoint,options);
         if (!result.ok) {
-			console.log("クエリエラーが発生しました");
+			console.log("WikiMedia APIでのクエリエラーが発生しました");
             return;
         }		
         const resultData = await result.json();	
@@ -126,7 +126,7 @@ async function getWdIDsBySE(label){
     try {
 		const result = await sendGetQuery(endpoint,options);
         if (!result.ok) {
-			console.log("クエリエラーが発生しました");
+			console.log("WikiMedia API【wbsearchentities】のクエリエラーが発生しました");
             return;
         }		
         const resultData = await result.json();	

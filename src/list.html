@@ -13,7 +13,7 @@
 
 <script>
 //詳細表示ページ用の設定
-const keylink = "item";	//リンクのkeyとする変数
+const keylink = "item";	//リンクのkeyとする変数（※空「""」にすると元URLへリンク)
 const detail_html = "details.html"; //詳細表示用のHTMLファイル
 let offset = 0; 
 
@@ -25,8 +25,8 @@ window.addEventListener('load', async () => {
 	sendButton.addEventListener('click', async () => {
         offset = 0;  
         document.getElementById("result_div").innerHTML="";
+        contButton.style.display="none";
         makeQuery();
-		//makeWikidataQuery();
 	}, false);
 
     //続きを検索実行ボタンの処理
@@ -42,7 +42,6 @@ window.addEventListener('load', async () => {
         document.getElementById('head').style.display = 'none';
         document.getElementById('menu').style.display = 'none';
 		makeQuery();
-		//makeWikidataQuery();
     }
 
 }, false);
@@ -52,158 +51,47 @@ async function makeQuery(){
     const endpoint = "https://query.wikidata.org/sparql";
     const resultArea = document.getElementById('result_div');
 	let query = document.getElementById('query_area').value;
+    const contButton = document.getElementById('cont');
    
     const delailsArea = document.getElementById('details_div');
     delailsArea.innerHTML='<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>';
 
-	//  検索条件を設定するには下記のコメントを外す 
-	//名称の検索にWikidataのAPIを使用する際は下記のコメントを外す
-	
     let conditions = "{\n";
+    let ids; 
 
     //名称の処理
     const textLABEL = document.getElementById('LABEL').value;
     if(textLABEL!=""){
-        const ids = await getWdIDs(textLABEL);
-        // const ids = await getWdIDsBySE(textLABEL);//
+        ids = await getWdIDs(textLABEL);
         const vals = ids.join(" ").replaceAll("Q","wd:Q"); 
-        //const vals = ids[0].replaceAll("Q","wd:Q"); //1個目のみ使う場合
-        // query = query.replace("#VALUES",'VALUES ?item {'+vals+'}');
         conditions+= 'VALUES ?item {'+vals+'}\n';
-        // query = query.replace("{",'{\n\tVALUES ?item {'+vals+'}');
-        // document.getElementById('query_area2').value = query;
     }  
 
-    // //検索条件１の処理
-    // const textCond1 = document.getElementById('cond1').value;
-    // const textVal1 = document.getElementById('val1').value;
-    // if(textCond1!="" && textVal1!=""){
-    //     conditions+= '?item '+textCond1+' '+textVal1+ '.\n';
-    // }  
-
-
-    // //検索条件2の処理
-    // const textCond2 = document.getElementById('cond2').value;
-    // const textVal2 = document.getElementById('val2').value;
-    // if(textCond2!="" && textVal2!=""){
-    //     conditions+= '?item '+textCond2+' "'+textVal2+ '"@ja .\n';
-    // }  
-
-
-    // //検索条件3の処理
-    // const textCond3 = document.getElementById('cond3').value;
-    // const textVal3 = document.getElementById('val3').value;
-    // if(textCond3!="" && textVal3!=""){
-    //     conditions+= textCond3.replace('####',textVal3)+'\n';
-    // }  
-
-
-    // //検索条件4の処理
-    // const textCond4 = document.getElementById('cond4').value;
-    // const textVal4 = document.getElementById('val4').value;
-    // if(textCond4!="" && textVal4!=""){
-    //     conditions+= textCond4.replace('####',textVal4)+'\n';
-    // }  
-
-    // let opt_select = "";
-    // let options = "";
-    // //追加項目の処理
-    // const textOpt1 = document.getElementById('opt1').value;
-    // if(textOpt1!=""){
-    //     opt_select += '?opt1Label';
-    //     if(document.getElementById('opt1_ck').checked){
-    //         options += 'OPTIONAL{?item '+ textOpt1+' ?opt1 .}\n';
-    //     }
-    //     else{
-    //         options += '?item '+ textOpt1+' ?opt1 .\n';
-    //     }
-    // }
-    // //追加項目の処理
-    // const textOpt2 = document.getElementById('opt2').value;
-    // if(textOpt2!=""){
-    //     opt_select += '?opt2Label';
-    //     if(document.getElementById('opt2_ck').checked){
-    //         options += 'OPTIONAL{?item '+ textOpt2+' ?opt2 .}\n';
-    //     }
-    //     else{
-    //         options += '?item '+ textOpt2+' ?opt2 .\n';
-    //     }
-    // }
-    // //追加項目の処理
-    // const textOpt3 = document.getElementById('opt3').value;
-    // if(textOpt3!=""){
-    //     opt_select += '?opt3Label';
-    //     if(document.getElementById('opt3_ck').checked){
-    //         options += 'OPTIONAL{?item '+ textOpt3+' ?opt3 .}\n';
-    //     }
-    //     else{
-    //         options += '?item '+ textOpt3+' ?opt3 .\n';
-    //     }
-    // }
-    // //追加項目の処理
-    // const textOpt4 = document.getElementById('opt4').value;
-    // if(textOpt4!=""){
-    //     opt_select += '?opt4Label';
-    //     if(document.getElementById('opt4_ck').checked){
-    //         options += 'OPTIONAL{?item '+ textOpt4+' ?opt4 .}\n';
-    //     }
-    //     else{
-    //         options += '?item '+ textOpt4+' ?opt4 .\n';
-    //     }
-    // }
-
-    // query = query.replace("{",conditions+options)
-    //              .replace("?itemLabel","?itemLabel "+opt_select);
     query = query.replace("{",conditions);
     document.getElementById('query_area2').value = query;
 
     //SPARQLクエリの実行
 	document.getElementById('result_box').style.display="flex";
-	
-    //showSearchIng(resultArea);
     dispLoading("検索中...");			
 
 	const resultData = await sendSPARQLQuery(endpoint, query);
-    
     removeLoading();
-
 
 	document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');
     showResult(resultData,resultArea); //クエリ結果の表示【テーブル表示用】
-    //showResultDetails(resultData,resultArea); //クエリ結果の表示【詳細表示用】
 
-    if(resultData.results.bindings.length == 0){
-        console.log("検索結果がゼロのため「続き」を自動検索");
-        offset += 50;
-        makeQuery();
+    if(ids!=null){
+        if(resultData.results.bindings.length == 0 && ids.length==50){
+            console.log("検索結果がゼロのため「続き」を自動検索");
+            offset += 50;
+            makeQuery();
+        }
+        else if(ids.length==50){
+            contButton.style.display="block";
+        }
     }
 
 }
-//Wikidata ID の検索を実行する　※こちらは廃止の方向で？
-async function makeWikidataQuery(){
-    const resultArea = document.getElementById('result_div');
-    // let options = document.getElementById('query_area').value;
-    // const endpoint ="https://www.wikidata.org/w/api.php";
-	
-	const textLABEL = document.getElementById('LABEL').value;
-	if(textLABEL==""){
-		alert("検索キーワードを入力してください");
-		return;
-	}
-	const endpoint ="https://www.wikidata.org/w/api.php";
-    const options ="?action=wbsearchentities&search="+textLABEL+"&language=en&limit=50&format=json";
-	document.getElementById('query_area2').value = options;
-
-    document.getElementById('result_box').style.display="flex";
-    showSearchIng(resultArea);
-
-    const resultData = await sendWdQuery(endpoint,options);
-    document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');  
-    
-    //showWdResult(resultData,resultArea); 
-	showWdResultWithLink(resultData,resultArea); //詳細表示との連携用
-}
-
 </script>
 </head>
 
@@ -215,25 +103,9 @@ async function makeWikidataQuery(){
 <!-- 検索条件設定の領域 -->
 <div id="menu" class="container">
 	<div style="margin-top:4px;">
-        <!-- <b>大学</b>[<a href="file:///D:/GitHub/KGSearchForWD/src/details.html?key=wd:Q3918">wd:Q3918</a>]の検索<br> -->
-		<input id="LABEL" type="text" value="" size="40"/>         
+        <input id="LABEL" type="text" value="" size="40"/>         
         <input type="button" id="send" value="検索の実行" style="margin-top:8px; ">
         <br>
-        <!-- 検索条件を設定するには下記のコメントを外す  -->
-		 <!-- <hr>
-         <b>詳細検索</b>:<br>
-         <span style="display: none;">分類：
-            <input id="cond1" class="cond" type="text" value="wdt:P31/wdt:P279*" size="20"/>
-            <input id="val1" type="text" value="wd:Q3918" size="20"/><br></span>
-        所在地（例：寝屋川市，大阪府）：
-            <input id="cond2" class="cond" type="text" value="wdt:P131/rdfs:label|wdt:P131/wdt:P131/rdfs:label" size="20"/>
-            <input id="val2" type="text" value="" size="20"/><br>
-        設立年（XXXX年以降，例：1990）：
-            <input id="cond3" class="cond" type="text" value='?item wdt:P571 ?p571 . FILTER(?p571 >= "####-01-01T00:00:00Z"^^xsd:dateTime)' size="20"/>
-            <input id="val3" type="text" value="" size="20"/><br>
-        設立年（XXXX以前，例：2010）：
-            <input id="cond4" class="cond" type="text" value='?item wdt:P571 ?p571 . FILTER(?p571 <= "####-12-31T23:59:59Z"^^xsd:dateTime)' size="20"/>
-            <input id="val4" type="text" value="" size="20"/><br> -->
         <hr> 
 		<!-- 下記の「クエリの表示・非表示」ボタンは，必要がなければコメントアウトしてもよい  -->
 		<input type="button" id="dis_b" value="クエリの表示"
@@ -248,15 +120,6 @@ async function makeWikidataQuery(){
 
 <div id="query" style="display:none">
 置き換え前のクエリ：<br>
-<!-- <input type="text" id="opt1" class="opt" value="wdt:P131" size="20"/>
-<input type="checkbox" id="opt1_ck"><br>
-<input type="text" id="opt2" class="opt" value="wdt:P18" size="20"/>
-<input type="checkbox" id="opt2_ck" checked><br>
-<input type="text" id="opt3" class="opt" value="wdt:P856 " size="20"/>
-<input type="checkbox" id="opt3_ck" checked><br>
-<input type="text" id="opt4" class="opt" value="wdt:P571" size="20"/>
-<input type="checkbox" id="opt4_ck"><br> -->
-<!-- 一覧検索用のサンプルクエリ：[詳細表示]を試すときは下記のクエリと入れ替える-->
 <textarea id="query_area" class="t_area" rows="10">
 PREFIX wd: <http://www.wikidata.org/entity/>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
@@ -265,7 +128,8 @@ PREFIX wikibase: <http://wikiba.se/ontology#>
 select DISTINCT ?item ?itemLabel
 where{
     SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
-}LIMIT 50		
+}ORDER BY ?itemLabel
+LIMIT 50		
 </textarea>
 <br>
 置き換え後のクエリ：<br>
@@ -282,10 +146,8 @@ where{
 <div id="result_box" style=" display: none;  ">
 	<div>
         <div id="result_div"  class="result_div" > </div>
-        <input type="button" id="cont" value="続きを検索" >
+        <input type="button" id="cont" value="続きを検索" style=" display: none;" >
     </div>
-	<!-- <div id="result_div"  class="container" style="flex: 1;"></div> -->
-	<!-- 詳細表示画面を使用するときは，この下のコメントアウトを外す -->
 	<div id="details_div" >
 		<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>
 	</div>
