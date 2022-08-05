@@ -21,6 +21,7 @@ window.addEventListener('load', async () => {
 
 	//検索実行ボタンの処理
 	sendButton.addEventListener('click', async () => {
+		document.getElementById("result_div").innerHTML="";
         makeQuery();
 		//makeWikidataQuery();
 	}, false);
