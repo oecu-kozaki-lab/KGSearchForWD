@@ -101,8 +101,7 @@ async function getWdID(label){
 }
 async function getWdIDsByWM(label,limit){
     const endpoint ="https://www.wikidata.org/w/api.php";
-    const options //="?action=wbsearchentities&search="+label+"&limit=50&format=json";
-				  = "?action=query&list=search&srsearch="+label+"&srlimit="+limit+"&sroffset="+offset+"&format=json";
+    const options  = "?action=query&list=search&srsearch="+label+"&srlimit="+limit+"&sroffset="+offset+"&format=json";
     try {
 		const result = await sendGetQuery(endpoint,options);
         if (!result.ok) {
@@ -128,8 +127,16 @@ async function getWdIDsByWM(label,limit){
 //WikiMedia APIを使ってIDを取得【wbsearchentities】
 //こちらは「前方一致」のみ？
 async function getWdIDsBySE(label){
-    const endpoint ="https://www.wikidata.org/w/api.php";
-    const options ="?action=wbsearchentities&search="+label+"&language=en&limit=50&format=json";
+	return getWdIDsByMEse(label,50);
+}
+
+async function getWdIDse(label){
+	return getWdIDsByMEse(label,1);
+}
+
+async function getWdIDsByMEse(label,limit){
+    const endpoint ="https://www.wikidata.org/w/api.php"; 
+    const options ="?action=wbsearchentities&search="+label+"&language=en&limit="+limit+"&continue="+offset+"&format=json";
     try {
 		const result = await sendGetQuery(endpoint,options);
         if (!result.ok) {
@@ -444,7 +451,7 @@ function showData(data_i){
 					data_i['oLabel'].value+'<br>';
 	}
 
-	//フォーマット調整
+	//フォーマット調整【検討中】
 	// mesText = mesText.replace('-01-01T00:00:00Z','');//日付について「年のみ」の場合は不要部分を削除
 	// mesText = mesText.replace('T00:00:00Z','');//日付について「年月日のみ」の場合は不要部分を削除
 
@@ -477,6 +484,21 @@ function showWdResultWithLink(resultData,resultArea){
 }
 
 /*
+ * 検索条件の設定
+ */
+function loadSearchConds(condData){  
+	let condText = "";
+	for(let i=0;i<condData.length;i++){
+		let condID = condData[i].id;
+		condText += '<span id="'+condID+'Span">'+condData[i].ctext +':';
+		condText += '<input id="'+condID+'" type="text" value='+"'"+condData[i].cond+"'"+' size="50"/>';
+		condText += '<input id="'+condID+'val" type="text" value="'+condData[i].val+'" size="20"/>';
+		condText += '<br></span>';
+	}
+	return condText;
+}
+
+/*
  * 検索表示項目の設定
  */
 function loadSearchProps(propData){  
@@ -494,9 +516,6 @@ function loadSearchProps(propData){
 	}
 
 	return propText;
-
-	// <input type="text" id="opt1" class="opt" value="wdt:P131" size="20"/>
-    // <input type="checkbox" id="opt1_ck"><br>
 }
 
 /* ------------------------------

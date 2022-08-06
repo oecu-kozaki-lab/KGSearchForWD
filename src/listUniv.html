@@ -18,6 +18,21 @@ const detail_html = "details.html"; //詳細表示用のHTMLファイル
 
 let offset = 0; 
 
+
+let search_cond = 
+    [
+        {"id":"cond1", "ctext":"分類", "cond":"wdt:P31/wdt:P279*", "val":"wd:Q3918", "type":"ID", "const":true },
+        {"id":"cond2", "ctext":"国", "cond":"wdt:P17", "val":"", "type":"getID", "const":false },
+        {"id":"cond3", "ctext":"所在地（例：寝屋川市，大阪府）", 
+            "cond":"wdt:P131/rdfs:label|wdt:P131/wdt:P131/rdfs:label", "val":"", "type":"STR-ja", "const":false },
+        {"id":"cond4", "ctext":"設立年（XXXX年以降，例：1990）", 
+            "cond":"?item wdt:P571 ?p571 . FILTER(?p571 >= \"####-01-01T00:00:00Z\"^^xsd:dateTime)", 
+            "val":"", "type":"REPLACE", "const":false },
+        {"id":"cond5", "ctext":"設立年（XXXX以前，例：2010）", 
+            "cond":"?item wdt:P571 ?p571 . FILTER(?p571 <= \"####-12-31T23:59:59Z\"^^xsd:dateTime)", 
+            "val":"", "type":"REPLACE", "const":false },
+    ];
+
 let search_prop = 
     [
         {"id":"opt1", "prop":"wdt:P17", "pname":"国", "optional":false },
@@ -30,8 +45,10 @@ let search_prop =
 window.addEventListener('load', async () => {
 	const sendButton = document.getElementById('send');
     const contButton = document.getElementById('cont');
-
+    
+    const serchCondDiv = document.getElementById('search_cond_div');
     const serchPropDiv = document.getElementById('search_prop_div');
+    serchCondDiv.innerHTML = loadSearchConds(search_cond);
     serchPropDiv.innerHTML = loadSearchProps(search_prop);
 
 	//検索実行ボタンの処理
@@ -92,36 +109,27 @@ async function makeQuery(){
         // document.getElementById('query_area2').value = query;
     }  
 
-    //検索条件１の処理【ID】
-    const textCond1 = document.getElementById('cond1').value;
-    const textVal1 = document.getElementById('val1').value;
-    if(textCond1!="" && textVal1!=""){
-        conditions+= '?item '+textCond1+' '+textVal1+ '.\n';
-    }  
-
-
-    //検索条件2の処理【ラベル(ja)】
-    const textCond2 = document.getElementById('cond2').value;
-    const textVal2 = document.getElementById('val2').value;
-    if(textCond2!="" && textVal2!=""){
-        conditions+= '?item '+textCond2+' "'+textVal2+ '"@ja .\n';
-    }  
-
-
-    //検索条件3の処理【置換】
-    const textCond3 = document.getElementById('cond3').value;
-    const textVal3 = document.getElementById('val3').value;
-    if(textCond3!="" && textVal3!=""){
-        conditions+= textCond3.replace('####',textVal3)+'\n';
-    }  
-
-
-    //検索条件4の処理【置換】
-    const textCond4 = document.getElementById('cond4').value;
-    const textVal4 = document.getElementById('val4').value;
-    if(textCond4!="" && textVal4!=""){
-        conditions+= textCond4.replace('####',textVal4)+'\n';
-    }  
+    //検索条件の設定
+    for(let i=0; i<search_cond.length ;i++){
+        const condID = search_cond[i].id;
+        const textCond = document.getElementById(condID).value;
+        const textVal = document.getElementById(condID+'val').value;
+        if(textCond!="" && textVal!=""){
+            if(search_cond[i].type =="ID"){
+                conditions+= '?item '+textCond+' '+textVal+ '.\n';
+            }
+            else if(search_cond[i].type =="getID"){
+                const qid = await getWdID(textVal); //IDを検索で取得     
+                conditions+= '?item '+textCond+' '+"wd:"+qid+ '.\n';
+            }
+            else if(search_cond[i].type =="STR-ja"){
+                conditions+= '?item '+textCond+' "'+textVal+ '"@ja .\n';
+            }
+            else if(search_cond[i].type =="REPLACE"){
+                conditions+= textCond.replace('####',textVal)+'\n';
+            }
+        }  
+    }
 
     //検索項目の設定
     let opt_select = "";
@@ -236,7 +244,8 @@ async function makeWikidataQuery(){
         <!-- 検索条件を設定するには下記のコメントを外す  -->
 		 <hr>
          <b>詳細検索</b>:<br>
-         <span style="display: block;">分類：
+         <div id="search_cond_div"></div>
+         <!-- <span style="display: block;">分類：
             <input id="cond1" class="cond" type="text" value="wdt:P31/wdt:P279*" size="20"/>
             <input id="val1" type="text" value="wd:Q3918" size="20"/><br></span>
         所在地（例：寝屋川市，大阪府）：
@@ -247,7 +256,7 @@ async function makeWikidataQuery(){
             <input id="val3" type="text" value="" size="20"/><br>
         設立年（XXXX以前，例：2010）：
             <input id="cond4" class="cond" type="text" value='?item wdt:P571 ?p571 . FILTER(?p571 <= "####-12-31T23:59:59Z"^^xsd:dateTime)' size="20"/>
-            <input id="val4" type="text" value="" size="20"/><br>
+            <input id="val4" type="text" value="" size="20"/><br> -->
         <hr> 
 		<!-- 下記の「クエリの表示・非表示」ボタンは，必要がなければコメントアウトしてもよい  -->
 		<input type="button" id="dis_b" value="クエリの表示"
