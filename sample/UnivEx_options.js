@@ -10,7 +10,7 @@ search_cond =
   },
   {
     "id": "cond2",
-    "ctext": "国",
+    "ctext": "国（例：アメリカ ※日本は「日本国」と入力）",
     "cond": "wdt:P17",
     "val": "",
     "type": "getID",

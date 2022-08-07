@@ -681,6 +681,7 @@ function setButtons(){
         document.getElementById('query').style.display = 'block';
 		dispQueryButton.style.display = 'none';
 		hideQueryButton.style.display = 'block';
+		saveSearchConds();
         serchCondDiv.innerHTML = loadSearchConds(true);//詳細検索画面の設定
 	});
 
@@ -719,7 +720,7 @@ async function makeSPARQLquery(query){
 			ids = await getWdIDsBySE(textLABEL);
 			//得られたID一覧の数が上限(=50)になったら,「続きを検索」表示をON
 			if(ids.length==50){
-				contQueryIds = false;
+				contQueryIds = true;
 			}
 			const vals = ids.join(" ").replaceAll("Q","wd:Q"); 
 			conditions+= 'VALUES ?item {'+vals+'}\n';
@@ -728,7 +729,7 @@ async function makeSPARQLquery(query){
 			ids = await getWdIDs(textLABEL);
 			//得られたID一覧の数が上限(=50)になったら,「続きを検索」表示をON
 			if(ids.length==50){
-				contQueryIds = false;
+				contQueryIds = true;
 			}
 			const vals = ids.join(" ").replaceAll("Q","wd:Q"); 
 			conditions+= 'VALUES ?item {'+vals+'}\n';
@@ -788,7 +789,7 @@ async function makeSPARQLquery(query){
     query = query.replace("{",conditions+options)
                  .replace("?itemLabel","?itemLabel "+opt_select);
 
-    if(offset!=0){
+    if(offset!=0 && !contQueryIds){
         query += "OFFSET "+offset; 
     }
 
