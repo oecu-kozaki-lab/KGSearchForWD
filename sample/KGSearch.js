@@ -520,8 +520,8 @@ function loadSearchConds(forDev){
 		//if(search_cond[i].cond != "" || forDev){
 			let condID = search_cond[i].id;
 
-			//条件固定（const=true）のときは「検索条件」としては非表示
-			if(search_cond[i].const && !forDev){
+			//「検索条件が未設定」または「条件固定（const=true）」のときは「検索時」に非表示
+			if((search_cond[i].cond == "" || search_cond[i].const ) && !forDev){
 				condText += '<span style="display:none">';
 			}else{ 
 				condText += '<span>';
@@ -717,7 +717,7 @@ async function makeSPARQLquery(query){
 		}
 		else if(document.getElementById('LabelForward').checked){
 			ids = await getWdIDsBySE(textLABEL);
-			//得られたID一覧の数が上限(=50)になったら，「続きを検索」表示をON
+			//得られたID一覧の数が上限(=50)になったら,「続きを検索」表示をON
 			if(ids.length==50){
 				contQueryIds = false;
 			}
@@ -726,7 +726,7 @@ async function makeSPARQLquery(query){
 		}
 		else if(document.getElementById('LabelAmbi').checked){
 			ids = await getWdIDs(textLABEL);
-			//得られたID一覧の数が上限(=50)になったら，「続きを検索」表示をON
+			//得られたID一覧の数が上限(=50)になったら,「続きを検索」表示をON
 			if(ids.length==50){
 				contQueryIds = false;
 			}
