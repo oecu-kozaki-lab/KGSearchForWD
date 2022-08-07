@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Wikidataを用いた検索システム</title>
+
+<link rel="stylesheet" href="style.css">
+<!-- KG検索用のライブラリ読み込み -->
+<script src="KGSearch.js"></script> 
+
+<script>
+//詳細表示ページ用の設定
+const keylink = "item";	//リンクのkeyとする変数（※空「""」にすると元URLへリンク)
+const detail_html = "details.html"; //詳細表示用のHTMLファイル
+let offset = 0; 
+
+window.addEventListener('load', async () => {
+	const sendButton = document.getElementById('send');
+    const contButton = document.getElementById('cont');
+
+	//検索実行ボタンの処理
+	sendButton.addEventListener('click', async () => {
+        offset = 0;  
+        document.getElementById("result_div").innerHTML="";
+        contButton.style.display="none";
+        makeQuery();
+	}, false);
+
+    //続きを検索実行ボタンの処理
+	contButton.addEventListener('click', async () => {
+        offset += 50;
+        makeQuery();
+	}, false);
+
+    //パラメータ(?key=XXXX)を使ったアクセスの処理
+    var param = location.search;
+    if(param!=""){
+        document.getElementById('QID').value = decodeURI(param.replace("?key=",""));
+        document.getElementById('head').style.display = 'none';
+        document.getElementById('menu').style.display = 'none';
+		makeQuery();
+    }
+
+}, false);
+
+//検索に用いるSPARQLクエリを生成し，実行する
+async function makeQuery(){
+    const endpoint = "https://query.wikidata.org/sparql";
+    const resultArea = document.getElementById('result_div');
+	let query = document.getElementById('query_area').value;
+    const contButton = document.getElementById('cont');
+   
+    const delailsArea = document.getElementById('details_div');
+    delailsArea.innerHTML='<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>';
+
+    let conditions = "{\n";
+    let ids; 
+
+    //名称の処理
+    const textLABEL = document.getElementById('LABEL').value;
+    if(textLABEL!=""){
+        ids = await getWdIDs(textLABEL);
+        const vals = ids.join(" ").replaceAll("Q","wd:Q"); 
+        conditions+= 'VALUES ?item {'+vals+'}\n';
+    }  
+
+    query = query.replace("{",conditions);
+    document.getElementById('query_area2').value = query;
+
+    //SPARQLクエリの実行
+	document.getElementById('result_box').style.display="flex";
+    dispLoading("検索中...");			
+
+	const resultData = await sendSPARQLQuery(endpoint, query);
+    removeLoading();
+
+	document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');
+    showResult(resultData,resultArea); //クエリ結果の表示【テーブル表示用】
+
+    if(ids!=null){
+        if(resultData.results.bindings.length == 0 && ids.length==50){
+            console.log("検索結果がゼロのため「続き」を自動検索");
+            offset += 50;
+            makeQuery();
+        }
+        else if(ids.length==50){
+            contButton.style.display="block";
+        }
+    }
+
+}
+</script>
+</head>
+
+<body>
+<header id="head" >
+	<h1>Wikidataを用いた検索システム</h1>
+</header>
+
+<!-- 検索条件設定の領域 -->
+<div id="menu" class="container">
+	<div style="margin-top:4px;">
+        <input id="LABEL" type="text" value="" size="40"/>         
+        <input type="button" id="send" value="検索の実行" style="margin-top:8px; ">
+        <br>
+        <hr> 
+		<!-- 下記の「クエリの表示・非表示」ボタンは，必要がなければコメントアウトしてもよい  -->
+		<input type="button" id="dis_b" value="クエリの表示"
+			onclick="document.getElementById('query').style.display = 'block';
+			document.getElementById('dis_b').style.display = 'none';
+			document.getElementById('none_b').style.display = 'block';">
+		<input type="button" id="none_b"  value="クエリの非表示" style="display:none"
+			onclick="document.getElementById('query').style.display = 'none';
+			document.getElementById('dis_b').style.display = 'block';
+			document.getElementById('none_b').style.display = 'none';">
+	</div>
+
+<div id="query" style="display:none">
+置き換え前のクエリ：<br>
+<textarea id="query_area" class="t_area" rows="10">
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+    
+select DISTINCT ?item ?itemLabel
+where{
+    SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
+}ORDER BY ?itemLabel
+LIMIT 50		
+</textarea>
+<br>
+置き換え後のクエリ：<br>
+<textarea id="query_area2" class="t_area" rows="10" >
+</textarea>
+<br>
+クエリ実行結果の戻り値(JSON形式）：<br>
+<textarea id="resjson_area"  class="t_area" rows="10" >
+</textarea>
+</div>
+</div>
+
+<!-- 結果表示用の領域 -->
+<div id="result_box" style=" display: none;  ">
+	<div>
+        <div id="result_div"  class="result_div" > </div>
+        <input type="button" id="cont" value="続きを検索" style=" display: none;" >
+    </div>
+	<div id="details_div" >
+		<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>
+	</div>
+</div>
+<hr>
+</body>
+</html>

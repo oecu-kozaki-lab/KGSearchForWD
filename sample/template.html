@@ -16,9 +16,6 @@
 const keylink = "item";	//リンクのkeyとする変数
 const detail_html = "details.html"; //詳細表示用のHTMLファイル
 
-//表示するプロパティの順番(必要に応じて変更する)
-const props = [] ;
-//const props = ["wdt:P17","wdt:P18"];  //記載例
 
 window.addEventListener('load', async () => {
 	const sendButton = document.getElementById('send');
@@ -28,15 +25,6 @@ window.addEventListener('load', async () => {
         makeQuery();
 	}, false);
 
-    //パラメータ(?key=XXXX)を使ったアクセスの処理
-    var param = location.search;
-    if(param!=""){
-		document.getElementById('QID').value = decodeURI(param.replace("?key=",""));
-        document.getElementById('head').style.display = 'none';
-        document.getElementById('menu').style.display = 'none';
-		makeQuery();
-    }
-
 }, false);
 
 //検索に用いるSPARQLクエリを生成し，実行する
@@ -45,20 +33,11 @@ async function makeQuery(){
     const resultArea = document.getElementById('result_div');
 	let query = document.getElementById('query_area').value;
 
-	const textQID = document.getElementById('QID').value;
-    if(textQID!=""){
-		if(textQID.startsWith("wd:Q")){
-			query = query.replace( '?QID', textQID );
-		}
-		else{
-			let qid = await getWdIDse(textQID); //getWdIDも使用可能
-			query = query.replace( '?QID', 'wd:'+qid );
-		}
-        document.getElementById('query_area2').value=query; 
-    }
-    else{
-        alert("「QID」または「ラベル」を入力して下さい");
-    }
+    //入力に応じてSPARQLクエリを書き換える（書き方のサンプル）
+    const InputText = document.getElementById('INPUT').value;
+    query = query.replace('####',InputText);
+
+    document.getElementById('query_area2').value = query;
 
     //SPARQLクエリの実行
 	resultArea.innerHTML="";
@@ -69,22 +48,22 @@ async function makeQuery(){
     
 	document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');
 	
-    showResultDetails(resultData,resultArea,props); //クエリ結果の表示【詳細表示用】
+    showResult(resultData,resultArea); //クエリ結果の表示
 }
 </script>
 </head>
 
 <body>
 <header id="head" >
-	<h1>Wikidataを用いた検索システム【詳細表示】</h1>
+	<h1>Wikidataを用いた検索システム【テンプレート】</h1>
 </header>
 
 <!-- 検索条件設定の領域 -->
 <div id="menu" class="container">
 	<div style="margin-top:4px;">
 		<!-- 検索条件を設定するには下記のコメントを外す  -->
-		Wikidata ID（例：wd:Q7105556），または，ラベルで検索<br>
-		 	<input id="QID" type="text" value="wd:Q7105556" autocomplete="off" size="20"/>
+		Wikidata検索テンプレート<br>
+		 	<input id="INPUT" type="text" value="" autocomplete="off" size="20"/>
 			<input type="button" id="send" value="検索の実行" style="margin-top:8px; "><br>
 		<hr> 
 		<!-- 下記の「クエリの表示・非表示」ボタンは，必要がなければコメントアウトしてもよい  -->
@@ -102,19 +81,14 @@ async function makeQuery(){
 		<b>置き換え前のクエリ</b>：<br>
 <!--注：こちらのクエリは【修正しない！】-->
 <textarea id="query_area" class="t_area" rows="10">
-select DISTINCT ?item ?itemLabel ?o ?oLabel ?p ?prop ?propLabel
-where{
-    BIND(?QID AS ?item)
-    ?item ?p ?o.
-    FILTER(
-    	(isLiteral(?o)&&((lang(?o)="ja")||(lang(?o)="")))
-    		||(!isLiteral(?o)
-	    &&(!contains(str(?o),"http://www.wikidata.org/entity/statement/"))
-		)
-    )
-	OPTIONAL{?prop wikibase:directClaim ?p.}
-    SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
-}		
+#ネコ
+SELECT ?item ?itemLabel 
+WHERE 
+{
+    ?item wdt:P31 wd:Q146. # ネコでなければならない
+    SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". } # ラベルをあなたの言語で、もしなければ英語で取得する
+}
+LIMIT 50
 </textarea>	
 	<br>
 		<b>置き換え後のクエリ</b>：<br>
@@ -126,6 +100,10 @@ where{
 <!-- 結果表示用の領域 -->
 <div id="result_box" style=" display: none;  ">
 	<div id="result_div"  class="container" style="flex: 1;"></div>
+	<!-- 詳細表示画面を使用するときは，この下のコメントアウトを外す -->
+	<!-- <div id="details_div" >
+		<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>
+	</div> -->
 </div>
 <hr>
 </body>

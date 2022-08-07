@@ -9,12 +9,12 @@
 
 <link rel="stylesheet" href="style.css">
 <script src="KGSearch.js"></script>     <!-- KG検索用のライブラリ読み込み -->
-<script src="options.js"></script> <!-- KG検索設定ファイルの読み込み -->
+<script src="UnivEx_options.js"></script> <!-- KG検索設定ファイルの読み込み -->
 
 <script>
 //詳細表示ページ用の設定
 const keylink = "item";	//リンクのkeyとする変数
-const detail_html = "details.html"; //詳細表示用のHTMLファイル
+const detail_html = "UnivEx_details.html"; //詳細表示用のHTMLファイル
 
 window.addEventListener('load', () => {
     setButtons();
@@ -52,7 +52,7 @@ async function makeQuery(){
 <!-- 検索条件設定の領域 -->
 <div id="menu" class="container">
 	<div style="margin-top:4px;">
-        <b>Wikidata全体</b>の検索<br>
+        <b>大学</b>[<a href="file:///D:/GitHub/KGSearchForWD/src/details.html?key=wd:Q3918">wd:Q3918</a>]の検索<br>
 		<input id="LABEL" type="text" value="" size="40"/>         
         <input type="button" id="send" value="検索の実行" style="margin-top:8px; "><br>
 	<hr>

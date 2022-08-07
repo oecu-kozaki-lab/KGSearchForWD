@@ -1,20 +1,6 @@
-/* 
- * 検索中...アニメーションの表示
- */
-function showSearchIng(resultArea){
-	const orgDiv = resultArea.innerHTML;
-	resultArea.innerHTML=orgDiv+'<div id="searching"><h2>検索中...</h2>'
-	   + '<div class="flower-spinner"><div class="dots-container">'
-	   +'<div class="bigger-dot"><div class="smaller-dot"></div>'
-	   +'</div></div></div>'+'<br></div>' ;
-}
-
-function removeSearchIng(){
-	const searchingDiv = document.getElementById("searching");
-	if(searchingDiv!=null){
-		searchingDiv.innerHTML="";
-	}
-}
+let offset = 0; 
+let contQueryIds = false; //「続きを検索」の表示が必要か？[APIでIDsを取得した際]
+let contQuery = false; //「続きを検索」の表示が必要か？[SPARQL用]
 
 /*
  * endpointで指定されたSPARQLエンドポイントにクエリを送信
@@ -93,9 +79,15 @@ async function sendWdQuery(endpoint,options){
 
 //WikiMedia APIを使ってIDを取得
 async function getWdIDs(label){
+	return getWdIDsByWM(label,50);
+}
+
+async function getWdID(label){
+	return getWdIDsByWM(label,1);
+}
+async function getWdIDsByWM(label,limit){
     const endpoint ="https://www.wikidata.org/w/api.php";
-    const options //="?action=wbsearchentities&search="+label+"&limit=50&format=json";
-				  = "?action=query&list=search&srsearch="+label+"&srlimit=50&sroffset="+offset+"&format=json";
+    const options  = "?action=query&list=search&srsearch="+label+"&srlimit="+limit+"&sroffset="+offset+"&format=json";
     try {
 		const result = await sendGetQuery(endpoint,options);
         if (!result.ok) {
@@ -121,8 +113,16 @@ async function getWdIDs(label){
 //WikiMedia APIを使ってIDを取得【wbsearchentities】
 //こちらは「前方一致」のみ？
 async function getWdIDsBySE(label){
-    const endpoint ="https://www.wikidata.org/w/api.php";
-    const options ="?action=wbsearchentities&search="+label+"&language=en&limit=50&format=json";
+	return getWdIDsByMEse(label,50);
+}
+
+async function getWdIDse(label){
+	return getWdIDsByMEse(label,1);
+}
+
+async function getWdIDsByMEse(label,limit){
+    const endpoint ="https://www.wikidata.org/w/api.php"; 
+    const options ="?action=wbsearchentities&search="+label+"&language=en&limit="+limit+"&continue="+offset+"&format=json";
     try {
 		const result = await sendGetQuery(endpoint,options);
         if (!result.ok) {
@@ -162,7 +162,8 @@ function showResult(resultData,resultArea){
 	else{
 		mesText = "<table>\n<tr>" ;
 		for(let j = 0; j < keys.length; j++){
-			mesText+='<th style="background:#afeeee">'+keys[j]+'</th>';
+			mesText+='<th style="background:#afeeee">'
+					+getSearchPropLabel(keys[j]) +'</th>';
 		}
 		mesText+="</tr>\n";
 	}
@@ -181,10 +182,52 @@ function showResult(resultData,resultArea){
             else{
                 mesText += '<th>'+getHtmlData(val)+'</th>';
             }			
-		}
+		} 
 		mesText+="</tr>";
 	}
 	resultArea.innerHTML = mesText+'</table>';
+
+	//「IDsの取得数」か「SPARQLの結果の数」がLIMITの50になった時は「続きを検索」ON
+	if(data.length == 50 || contQueryIds){
+		contQuery = true; 
+	}
+	else {
+		contQuery = false;
+	}
+
+	const contButton = document.getElementById('cont');
+	if(contQuery){ 
+        contButton.style.display="block";
+    }
+    else{
+        contButton.style.display="none";
+    }
+}
+
+//検索結果表示用の「項目名」の取得
+function getSearchPropLabel(p){
+	if (typeof(search_prop) === 'undefined'){
+		return p;
+	}
+	if(search_prop==null){
+		return p;
+	}
+
+	if(p=='item'){
+		return "QID";
+	}
+	else if(p=='itemLabel'){
+		return "ラベル";
+	}
+
+	//optの処理
+	for(let i=0;i<search_prop.length;i++){
+		if(search_prop[i].id + "Label" == p){
+			return search_prop[i].pname; 
+		}
+	}
+
+	return p;
 }
 
 function getHtmlData(val){
@@ -231,7 +274,6 @@ function getLinkURL(val){
  */
 function showResultDetails(resultData,resultArea,props){
 	//表示するプロパティの順番を設定
-	//const props = ["P17","P131","P18","P856","P571"];
 	let propLen = 0;
 	if(props!=null){
 		propLen = props.length;	
@@ -353,6 +395,14 @@ function hideOther(){
 function showData(data_i){
 	var mesText = "" ;
 	
+	let lang ="";
+	if(data_i['oLabel']['xml:lang'] != null){
+		lang += ' (' +data_i['oLabel']['xml:lang'] + ')';
+	}
+	else if(data_i['itemLabel']['xml:lang'] != null){
+		lang += ' (' +data_i['itemLabel']['xml:lang'] + ')';
+	}
+
 	if(data_i['propLabel']!=null){//wdt:XXXの述語処理
 		const prop = '<b>'+data_i['propLabel'].value + '</b>'
 		             +'['+ data_i['prop'].value.replace('http://www.wikidata.org/entity/','wdt:') +']';
@@ -379,6 +429,15 @@ function showData(data_i){
 		}
 		else{//目的語がそれ以外
 			object += data_i['oLabel'].value;
+			if(data_i['oLabel']['xml:lang'] != null){
+				object += ' (' +data_i['oLabel']['xml:lang'] + ')';
+			}
+			if(data_i['o'].datatype != null){
+				object += ' ('
+					   + data_i['o'].datatype.replace('http://www.w3.org/2001/XMLSchema#','xsd:')
+					                         .replace('http://www.opengis.net/ont/geosparql#','geo:')
+				       + ')';
+			}
 		}
 		return '<tr><th>'+ prop + '</th><td>'+ object +'</td></tr>';
 	}
@@ -395,25 +454,25 @@ function showData(data_i){
 	}
 	else if(data_i['p'].value=="http://www.w3.org/2000/01/rdf-schema#label"){
 		mesText+='<tr><th><b>名前</b></th><td>'
-				+ data_i['oLabel'].value+'</td></tr>';
+				+ data_i['oLabel'].value+ lang + '</td></tr>';
 		//mesText += '名前 - '+ data_i['oLabel'].value+'<br>';
 	}
 	else if(data_i['p'].value=="http://www.w3.org/2004/02/skos/core#altLabel"){
 		mesText+='<tr><th><b>別名</b></th><td>'
-				+ data_i['oLabel'].value+'</td></tr>';
+				+ data_i['oLabel'].value+lang + '</td></tr>';
 		//mesText += '別名 - '+ data_i['oLabel'].value+'<br>';
 	}
 	else if(data_i['p'].value=="http://schema.org/description"){
 		mesText+='<tr><th><b>説明</b></th><td>'
-				+ data_i['oLabel'].value+'</td></tr>';
+				+ data_i['oLabel'].value+lang + '</td></tr>';
 		// mesText += '説明 - '+ data_i['oLabel'].value+'<br>';
 	}
-	else{//wdt:XXX以外の述語の処理
-		mesText += data_i['p'].value+' - '+
-					data_i['oLabel'].value+'<br>';
-	}
+	// else{//wdt:XXX以外の述語の処理【検討中】
+	// 	mesText += data_i['p'].value+' - '+
+	// 				data_i['oLabel'].value+'<br>';
+	// }
 
-	//フォーマット調整
+	//フォーマット調整【検討中】
 	// mesText = mesText.replace('-01-01T00:00:00Z','');//日付について「年のみ」の場合は不要部分を削除
 	// mesText = mesText.replace('T00:00:00Z','');//日付について「年月日のみ」の場合は不要部分を削除
 
@@ -445,6 +504,107 @@ function showWdResultWithLink(resultData,resultArea){
 	resultArea.innerHTML = mesText;//+'</table>';
 }
 
+/*
+ * 検索条件の設定 「クエリ表示」用の時はforDev=true;
+ */
+function loadSearchConds(forDev){  
+	let condText = "";
+	let condType = '<select id="condType" name="type" >'
+		+'<option value="ID">IRI(ID)を入力</option>'
+		+'<option value="STR-ja">文字列(ja)</option>'
+		+'<option value="REPLACE">置換</option>'
+		+'<option value="getID">検索でIDに変換</option>'
+		+'</select>';
+
+	for(let i=0;i<search_cond.length;i++){
+		//if(search_cond[i].cond != "" || forDev){
+			let condID = search_cond[i].id;
+
+			//条件固定（const=true）のときは「検索条件」としては非表示
+			if(search_cond[i].const && !forDev){
+				condText += '<span style="display:none">';
+			}else{ 
+				condText += '<span>';
+			}
+
+			//「クエリ表示」用(forDev=true)の時は表示を変える
+			if(forDev){
+				condText += '条件('+condID+') 説明:';//search_cond[i].ctext +':';
+				condText += '<input id="'+condID+'Text" type="text" value="'+search_cond[i].ctext +'" size="30"/>';
+				condText += ' 条件設定:<input id="'+condID+'" type="text" value='+"'"+search_cond[i].cond+"'"+' size="40"/>=';
+				condText += condType.replace("cond",condID)
+									.replace('"'+search_cond[i].type+'"','"'+search_cond[i].type+'" selected')+'=値:';
+			}else{
+				condText += '<input id="'+condID+'Text" type="text" value="'+search_cond[i].ctext
+						+ '" size="30" style="display:none"/>';
+				condText += search_cond[i].ctext +':';
+				condText += '<input id="'+condID+'" type="text" value='+"'"+search_cond[i].cond+"'"
+						+ ' size="40" style="display:none"/>';
+			}
+			condText += '<input id="'+condID+'Val" type="text" value="'+search_cond[i].val+'" size="10"/>';
+			let ck = "";
+			if(search_cond[i].const){
+				ck ="checked";
+			}
+
+			if(forDev){	
+				condText += '<input type="checkbox" id="'+condID+'_ck" ' + ck +'>固定条件';
+			}
+			else{
+				condText += '<input type="checkbox" id="'+condID+'_ck" ' + ck +' style="display:none">';
+			}
+		condText += '<br></span>';
+		//}
+	}
+	return condText;
+}
+
+function saveSearchConds(){ 
+	for(let i=0;i<search_cond.length;i++){
+		let condID = search_cond[i].id;
+		search_cond[i].ctext = document.getElementById(condID+'Text').value;
+		search_cond[i].cond  = document.getElementById(condID).value;
+		search_cond[i].val = document.getElementById(condID+'Val').value;
+		const typeList = document.getElementById(condID+'Type');
+		if(typeList!=null){
+			const num = typeList.selectedIndex;
+			search_cond[i].type = typeList.options[num].value;
+		}
+		search_cond[i].const = document.getElementById(condID+'_ck').checked;
+	}
+	return search_cond;
+}
+
+/*
+ * 検索表示項目の設定
+ */
+function loadSearchProps(){  
+	let propText = "";
+	for(let i=0;i<search_prop.length;i++){
+		let ck = "";
+		if(search_prop[i].optional){
+			ck ="checked";
+		}
+		propText += '項目名(?'+search_prop[i].id + '):<input type="text" id="'+search_prop[i].id + '_name" '
+				 +  'value="'+search_prop[i].pname+'" size="20"/>';
+		propText += ' ID:<input type="text" id="'+search_prop[i].id + '" '
+				 +  'value="'+search_prop[i].prop+'" size="20"/>';
+		propText += '<input type="checkbox" id="'+search_prop[i].id+'_ck" ' + ck +'>OPTIONAL<br>';
+	}
+	return propText;
+}
+
+function saveSearchProps(){  
+	for(let i=0;i<search_prop.length;i++){
+		let propID = search_prop[i].id;
+		search_prop[i].prop = document.getElementById(propID).value;
+		search_prop[i].pname = document.getElementById(propID+'_name').value;
+		search_prop[i].optional = document.getElementById(propID+'_ck').checked;
+	}
+	return search_prop;
+}
+
+
 /* ------------------------------
  Loading イメージ表示関数
  ------------------------------ */
@@ -467,3 +627,215 @@ function showWdResultWithLink(resultData,resultArea){
    function removeLoading(){
 	document.getElementById("loading").remove();
    }
+
+/*
+ * 各ボタンの設定
+ */
+function setButtons(){
+	const sendButton = document.getElementById('send');
+    const contButton = document.getElementById('cont');
+    
+    const showQueryCondButton = document.getElementById('showQueryCond');
+    const hideQueryCondButton = document.getElementById('hideQueryCond');
+
+    const dispQueryButton = document.getElementById('dispQuery');
+    const hideQueryButton = document.getElementById('hideQuery');
+    
+    const serchCondDiv = document.getElementById('search_cond_div');
+    const serchPropDiv = document.getElementById('search_prop_div');
+
+    serchCondDiv.innerHTML = loadSearchConds(false);//詳細検索画面の設定
+    serchPropDiv.innerHTML = loadSearchProps();//検索条件設定画面の設定
+    
+	//検索実行ボタンの処理
+	sendButton.addEventListener('click', async () => {
+        offset = 0;  
+		contQueryIds = false;
+        contQuery = false;
+        document.getElementById("result_div").innerHTML="";
+        contButton.style.display="none";
+        makeQuery();
+		//makeWikidataQuery();
+	}, false);
+
+    //詳細検索表示ボタンの処理
+	showQueryCondButton.addEventListener('click', () => {
+        document.getElementById('QueryCond_div').style.display = 'block';
+        showQueryCondButton.style.display = 'none';
+        hideQueryCondButton.style.display = 'block';
+        serchCondDiv.innerHTML = loadSearchConds(false);//詳細検索画面の設定
+	});
+    hideQueryCondButton.addEventListener('click', () => {
+        document.getElementById('QueryCond_div').style.display = 'none';
+        showQueryCondButton.style.display = 'block';
+        hideQueryCondButton.style.display = 'none';
+        document.getElementById('query').style.display = 'none';
+		dispQueryButton.style.display = 'block';
+		hideQueryButton.style.display = 'none';
+        saveSearchConds();
+        saveSearchProps();
+	});
+
+    //クエリ表示ボタンの処理
+	dispQueryButton.addEventListener('click', () => {
+        document.getElementById('query').style.display = 'block';
+		dispQueryButton.style.display = 'none';
+		hideQueryButton.style.display = 'block';
+        serchCondDiv.innerHTML = loadSearchConds(true);//詳細検索画面の設定
+	});
+
+    //クエリ非表示ボタンの処理
+	hideQueryButton.addEventListener('click', () => {
+        document.getElementById('query').style.display = 'none';
+		dispQueryButton.style.display = 'block';
+		hideQueryButton.style.display = 'none';
+        saveSearchConds();
+        saveSearchProps();
+        serchCondDiv.innerHTML = loadSearchConds(false);//詳細検索画面の設定
+	});
+
+    //続きを検索実行ボタンの処理
+	contButton.addEventListener('click', async () => {
+        offset += 50;
+        makeQuery();
+	}, false);
+}
+
+/* 
+ * GUIの情報を使ってSPARQLクエリを作る
+ */
+async function makeSPARQLquery(query){
+	let conditions = "{\n";
+    let ids; 
+
+    //名称の処理
+    const textLABEL = document.getElementById('LABEL').value;
+    if(textLABEL!=""){
+		if(document.getElementById('LabelFull').checked){
+			conditions+= '{?item rdfs:label|skos:altLabel "'+textLABEL+'"@ja.}\n';
+			conditions+= 'UNION {?item rdfs:label|skos:altLabel "'+textLABEL+'"@en.}\n';
+		}
+		else if(document.getElementById('LabelForward').checked){
+			ids = await getWdIDsBySE(textLABEL);
+			//得られたID一覧の数が上限(=50)になったら，「続きを検索」表示をON
+			if(ids.length==50){
+				contQueryIds = false;
+			}
+			const vals = ids.join(" ").replaceAll("Q","wd:Q"); 
+			conditions+= 'VALUES ?item {'+vals+'}\n';
+		}
+		else if(document.getElementById('LabelAmbi').checked){
+			ids = await getWdIDs(textLABEL);
+			//得られたID一覧の数が上限(=50)になったら，「続きを検索」表示をON
+			if(ids.length==50){
+				contQueryIds = false;
+			}
+			const vals = ids.join(" ").replaceAll("Q","wd:Q"); 
+			conditions+= 'VALUES ?item {'+vals+'}\n';
+		}
+		else if(document.getElementById('LabelPart').checked){
+			conditions+= '?item rdfs:label ?label.\n';
+			conditions+= 'FILTER(contains(?label,"'+textLABEL+'"))' ;
+		}      
+    }  
+        
+    //検索条件・検索項目の更新
+    document.getElementById('settings_area').value
+        ="let search_cond = \n" + JSON.stringify(saveSearchConds(),null,'  ') +";\n\n"
+        +"let search_prop = \n" + JSON.stringify(saveSearchProps(),null,'  ') +";\n";
+
+    //検索条件の設定
+    for(let i=0; i<search_cond.length ;i++){
+        const condID = search_cond[i].id;
+        const textCond = search_cond[i].cond; 
+        const textVal = search_cond[i].val;
+        if(textCond!="" && textVal!=""){
+            if(search_cond[i].type =="ID"){
+                conditions+= '?item '+textCond+' '+textVal+ '.\n';
+            }
+            else if(search_cond[i].type =="getID"){
+                const qid = await getWdIDse(textVal); //IDを検索で取得     
+                conditions+= '?item '+textCond+' '+"wd:"+qid+ '.\n';
+            }
+            else if(search_cond[i].type =="STR-ja"){
+                conditions+= '?item '+textCond+' "'+textVal+ '"@ja .\n';
+            }
+            else if(search_cond[i].type =="REPLACE"){
+                conditions+= textCond.replace('####',textVal)+'\n';
+            }
+        }  
+    }
+
+    //検索項目の設定
+    let opt_select = "";
+    let options = "";
+	for(let i=0;i<search_prop.length;i++){
+        const optid = search_prop[i].id;        
+        const textOpt = search_prop[i].prop;
+        const textPname = search_prop[i].pname; 
+        
+        if(textOpt!=""){
+            opt_select += '?'+optid+'Label';
+            if(search_prop[i].optional){
+                options += 'OPTIONAL{?item '+ textOpt+' ?'+optid+' .}\n';
+            }
+            else{
+                options += '?item '+ textOpt+' ?'+optid+' .\n';
+            }
+        }
+    }
+	
+    query = query.replace("{",conditions+options)
+                 .replace("?itemLabel","?itemLabel "+opt_select);
+
+    if(offset!=0){
+        query += "OFFSET "+offset; 
+    }
+
+	return query;
+}
+
+
+
+//Wikidata ID の検索を実行する　※こちらは廃止の方向で？
+async function makeWikidataQuery(){
+    const resultArea = document.getElementById('result_div');
+    // let options = document.getElementById('query_area').value;
+    // const endpoint ="https://www.wikidata.org/w/api.php";
+	
+	const textLABEL = document.getElementById('LABEL').value;
+	if(textLABEL==""){
+		alert("検索キーワードを入力してください");
+		return;
+	}
+	const endpoint ="https://www.wikidata.org/w/api.php";
+    const options ="?action=wbsearchentities&search="+textLABEL+"&language=en&limit=50&format=json";
+	document.getElementById('query_area2').value = options;
+
+    document.getElementById('result_box').style.display="flex";
+    showSearchIng(resultArea);
+
+    const resultData = await sendWdQuery(endpoint,options);
+    document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');  
+    
+    //showWdResult(resultData,resultArea); 
+	showWdResultWithLink(resultData,resultArea); //詳細表示との連携用
+}
+
+
+/* 
+ * 検索中...アニメーションの表示
+ */
+function showSearchIng(resultArea){
+	const orgDiv = resultArea.innerHTML;
+	resultArea.innerHTML=orgDiv+'<div id="searching"><h2>検索中...</h2>'
+	   + '<div class="flower-spinner"><div class="dots-container">'
+	   +'<div class="bigger-dot"><div class="smaller-dot"></div>'
+	   +'</div></div></div>'+'<br></div>' ;
+}
+function removeSearchIng(){
+	const searchingDiv = document.getElementById("searching");
+	if(searchingDiv!=null){
+		searchingDiv.innerHTML="";
+	}
+}
