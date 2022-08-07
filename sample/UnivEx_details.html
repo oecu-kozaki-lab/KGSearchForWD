@@ -14,11 +14,9 @@
 <script>
 //詳細表示ページ用の設定
 const keylink = "item";	//リンクのkeyとする変数
-const detail_html = "details.html"; //詳細表示用のHTMLファイル
-
+const detail_html = "UnivEx_details.html"; //詳細表示用のHTMLファイル
 //表示するプロパティの順番(必要に応じて変更する)
-const props = [] ;
-//const props = ["wdt:P17","wdt:P18"];  //記載例
+const props = ["wdt:P17","wdt:P131","wdt:P625","wdt:P18","wdt:P856","wdt:P571"]; 
 
 window.addEventListener('load', async () => {
 	const sendButton = document.getElementById('send');

@@ -32,7 +32,8 @@ header > h1 {
 }
 
 .cond {
- display: none; 
+  padding: 0;
+  /* display: block;  */
 }
 
 table {

@@ -14,34 +14,43 @@
 	<h1>KGSearchForWDの利用例</h1>
 </header>
 
+<div class="container">
+
 <!-- 検索条件設定の領域 -->
-
-
-
-<dl>
-    <dd>
+<!-- <dl>
+    <dd> -->
         <h2>Wikidataを用いた検索システム例</h2>
-        <p>KGSearchForWDの利用例です．<br>
-            いずれのサンプルも<a href="https://github.com/oecu-kozaki-lab/KGSearchForWD/blob/main/src/template.html">template.html</a>
-            に必要な設定を追加することで簡単に作成できます．<br>
-            ★印は「おススメ」のサンプルです．
-            </p>
+        <p><b>KGSearchForWD</b>の利用例です．<br>
+           <b>「テンプレート」</b>とするサンプルに必要な修正を加えることで，<b>「特定分野の検索システム」</b>が簡単に作成できます．<br>
+           （★）が中心となるプログラムです． 
+        </p>
 
-        <ML><b>SPARQLクエリのみを使用したサンプル</b>
-            <li><a href="ListSample.html">一覧検索</a></li>
-            <li><a href="EntitySample.html">詳細表示</a></li>
-            <li>★<a href="List+EntitySample.html">一覧検索＋詳細表示</a></li>
-        </ML>
-        <br>
-        <ML><b>WikiMedia API + SPARQLクエリを使用したサンプル</b>
-            <li><a href="SampleWD.html">Wikidata ID (QID)の一覧検索【WikiMedia(Wikibase) API使用】</a></li>
-            <li><a href="SampleWD+Details.html">QIDの一覧検索＋詳細表示</a></li>
-            <li>★<a href="list.html">Wikidata全体の汎用検索【WikiMedia API+SPARQL使用】</a></li>
-            <li>★<a href="listUniv.html">「大学」の検索【WikiMedia API+SPARQL使用】</a></li>
-        </ML>
-    </dd>
-</dl>
+        <H3>テンプレート用プログラム</H3>
+        <!-- <UL><LI>テンプレート -->
+        <OL>
+            <li><a href="template.html" target="_blank">「SPARQLクエリ実行」用の基本プログラム</a></li>
+            <li><a href="list.html" target="_blank">「Wikidata全体を対象とした検索システム」のテンプレート</a>（★1）
+                <UL><LI>options.js：詳細設定用ファイルのテンプレート</li></UL>
+            </li>
+            <li><a href="details.html" target="_blank">「Wikidata汎用の詳細表示」のテンプレート</a>
+                <UL><LI>（★1）の検索結果一覧から参照しています</li></UL>
+            </li>
+            <li><a href="WM-APIsample.html" target="_blank">「WikiMedia API」を利用した検索プログラムの例</a></li>
+        </OL>
 
+        <H3>サンプルプログラム</H3>
+        <!-- <UL><LI>テンプレート -->
+        <OL>
+            <li><a href="UnivEx_list.html" target="_blank">「大学」を対象とした検索システムのサンプル</a>（★2）
+                <UL><LI>UnivEx_options.js：「大学」用にカスタマイズした詳細設定用ファイル例</li></UL>
+            </li>
+            <li><a href="UnivEx_details.html" target="_blank">「大学」用の詳細表示のサンプル</a>
+                <UL><LI>（★2）の検索結果一覧から参照しています</li></UL>
+            </li>
+        </OL>
+    <!-- </dd>
+</dl> -->
+</div>
 <hr>
 </body>
 </html>
