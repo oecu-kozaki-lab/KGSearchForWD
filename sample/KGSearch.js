@@ -380,6 +380,236 @@ function showResultDetails(resultData,resultArea,props){
 	resultArea.innerHTML = mesText;
 }
 
+
+/*
+ * クエリ結果の表示処理[指定したデータの詳細表示用]
+ */
+function showResultDetails2(resultData,resultArea,props){
+	//表示するプロパティの順番を設定
+	let propLen = 0;
+	if(props!=null){
+		propLen = props.length;	
+	} 
+	const data = resultData.results.bindings;
+	const len = data.length;
+
+	if(len==0){
+		resultArea.innerHTML = "検索結果なし";
+		return;
+	}
+
+	let rownum = [];
+	let rowprop = [];
+	rownum[0] = 1;
+	rowprop[0] = data[0]['p'].value;
+	for(let i=1 ;i<len;i++){
+		rowprop[i] = data[i]['p'].value;
+		if(data[i]['p'].value == data[i-1]['p'].value){
+			rownum[i] = 0;
+			for(let j=i;j>0;j--){
+				if(rownum[j]>0){
+					rownum[j]++;
+					break;
+				}
+			}
+		}
+		else{
+			rownum[i] = 1;
+		}
+	}
+	for(var i = 0; i < rownum.length; i++) {
+		　console.log(rowprop[i] +'='+rownum[i]);
+		}
+
+	//ラベル,説明,上位クラス
+	let labelText = "";
+	let altLabelText = "";
+	let descText = "";
+	let subCls = "";
+	let insOf = "";
+	
+	//順番を指定したプロパティ用
+	let texts = [];
+	for(let j=0 ;j<propLen;j++){
+		texts.push('');
+	}
+
+	//その他用
+	let otherText = "";
+	
+	//見出し語部分	
+	if(data[0]['item']!=null){
+		labelText += '<h2 style="background:#afeeee">'+data[0]['itemLabel'].value
+			+'<br><font size="3">（Wikidata ID:<a href="'+data[0]['item'].value.replace('http://','https://')
+			+'" target="_blank">'
+            +data[0]['item'].value.replace('http://www.wikidata.org/entity/',"")
+            +'</a>）</font></h2>';
+	}
+
+	labelText += '<table class="result-table">' ;
+		
+	for(let i=0 ;i<len;i++){
+		let prop = data[i]['p'].value.replace("http://www.wikidata.org/prop/direct/","wdt:");
+		if(prop.endsWith("rdf-schema#label")){
+			labelText += showData2(data[i],rownum[i]);
+		}
+		else if(prop.endsWith("core#altLabel")){
+			altLabelText += showData2(data[i],rownum[i]);
+		}
+		else if(prop.endsWith("schema.org/description")){
+			descText += showData2(data[i],rownum[i]);
+		}
+		else if(prop.endsWith("P279")){
+			subCls += showData2(data[i],rownum[i]);
+		}
+		else if(prop.endsWith("P31")){
+			insOf += showData2(data[i],rownum[i]);
+		}
+		//wdt:以外のプロパティは表示しない【暫定処理】
+		else if(prop.startsWith("wdt:")){
+			let sw = true;
+			for(let j=0 ;j<propLen;j++){
+				if(prop.endsWith(props[j])){	
+					texts[j] += showData2(data[i],rownum[i]);
+					sw = false;
+					break;
+				}
+			}
+			if(sw){
+				otherText += showData2(data[i],rownum[i]);
+			}
+		}
+	}
+
+	// labelText += "</table>\n" ;
+
+	let mesText = labelText + altLabelText + descText +"</table><hr>";
+
+	if(""!=(subCls+insOf)){
+		mesText += '<table class="result-table">'+subCls + insOf +"</table><hr>";
+	}
+
+	let propText = "";
+	for(let j=0 ;j<propLen;j++){
+		propText += texts[j];
+	}
+
+	if(otherText!=""){
+		otherText = '<table class="result-table">' + otherText +"</table>";	
+	}
+
+	//表示するプロパティを指定している場合は，「すべて表示」ボタンでの制御を追加
+	if(propText!=""){
+		mesText += '<table class="result-table">'+propText +"</table><hr>";
+		mesText +='<input type="button" id="show_other" value="▼すべて表示" onclick="showOther()">'
+					+'<input type="button" id="hide_other"'
+				+' style="display: none;" value="▲表示を減らす" onclick="hideOther()"><br>'
+		mesText += '<div id="other_prop" style="display: none;" >'+otherText+'</div>';
+	}
+	else{
+		mesText += otherText;
+	}
+
+	console.log(mesText);
+
+	resultArea.innerHTML = mesText;
+}
+
+//セルの立て結合を考慮した処理
+function showData2(data_i,rownum){
+	var mesText = "" ;
+	let prop = "";
+	let object = "";
+	let lang ="";
+
+	if(data_i['oLabel']['xml:lang'] != null){
+		lang += ' (' +data_i['oLabel']['xml:lang'] + ')';
+	}
+	else if(data_i['itemLabel']['xml:lang'] != null){
+		lang += ' (' +data_i['itemLabel']['xml:lang'] + ')';
+	}
+
+	if(data_i['propLabel']!=null){//wdt:XXXの述語処理
+		prop = '<b>'+data_i['propLabel'].value + '</b>'
+		             +'['+ data_i['prop'].value.replace('http://www.wikidata.org/entity/','wdt:') +']';
+		
+
+		if(data_i['o'].value.startsWith('http://www.wikidata.org/entity/')){//目的語がwd:XX
+			const qid = data_i['o'].value.replace('http://www.wikidata.org/entity/','wd:');
+			object += '<b>'+ data_i['oLabel'].value + '</b>' +
+					'<a href="'+detail_html+'?key='+qid+ '">'+
+					'['+qid+']</a>';
+		}
+		else if(data_i['o'].value.startsWith('http')){//目的語がURL
+			if(data_i['o'].value.endsWith('.jpg')
+				|| data_i['o'].value.endsWith('.JPG')
+				|| data_i['o'].value.endsWith('.png')
+				|| data_i['o'].value.endsWith('.svg')
+				|| data_i['o'].value.endsWith('.jpeg')){
+					object += '<img src="'+data_i['o'].value +'" width="180">'+'</img>';
+			}
+			else{
+				object += '<a href="'+data_i['o'].value.replace('http://','https://') 
+				        +'" target="_blank">'+ data_i['oLabel'].value+'</a>';
+				}
+		}
+		else{//目的語がそれ以外
+			object += data_i['oLabel'].value;
+			if(data_i['oLabel']['xml:lang'] != null){
+				object += ' (' +data_i['oLabel']['xml:lang'] + ')';
+			}
+			if(data_i['o'].datatype != null){
+				object += ' ('
+					   + data_i['o'].datatype.replace('http://www.w3.org/2001/XMLSchema#','xsd:')
+					                         .replace('http://www.opengis.net/ont/geosparql#','geo:')
+				       + ')';
+			}
+		}	
+	}
+	else if(data_i['p'].value.startsWith('http://www.wikidata.org/prop/direct-normalized/')){
+		if(data_i['o'].value.startsWith('http')){//目的語がURL
+			prop = data_i['p'].value.replace('http://www.wikidata.org/prop/direct-normalized/','wdtn:');
+			object = '<a href="'+data_i['o'].value.replace('http://','https://') 
+						+'" target="_blank">'+ data_i['oLabel'].value+'</a>';
+		}
+		else{
+			prop = data_i['p'].value;
+			object = data_i['oLabel'].value+'</a>';
+		}
+	}
+	else if(data_i['p'].value=="http://www.w3.org/2000/01/rdf-schema#label"){
+		prop = '<b>名前</b>';
+		object = data_i['oLabel'].value+ lang ;
+	}
+	else if(data_i['p'].value=="http://www.w3.org/2004/02/skos/core#altLabel"){
+		prop = '<b>別名</b>';
+		object = data_i['oLabel'].value+ lang ;
+	}
+	else if(data_i['p'].value=="http://schema.org/description"){
+		prop ='<b>説明</b>';
+		object = data_i['oLabel'].value+ lang ;
+	}
+	// else{//wdt:XXX以外の述語の処理【検討中】
+	// 	mesText += data_i['p'].value+' - '+
+	// 				data_i['oLabel'].value+'<br>';
+	// }
+
+	//フォーマット調整【検討中】
+	// mesText = mesText.replace('-01-01T00:00:00Z','');//日付について「年のみ」の場合は不要部分を削除
+	// mesText = mesText.replace('T00:00:00Z','');//日付について「年月日のみ」の場合は不要部分を削除
+
+	//return mesText;
+	if(rownum>1){
+		return '<tr><th rowspan="'+rownum+'">'+ prop + '</th><td>'+ object +'</td></tr>';
+	}
+	else if(rownum==0){
+		return '<tr><td>'+ object +'</td></tr>';
+	}
+	else{
+		return '<tr><th>'+ prop + '</th><td>'+ object +'</td></tr>';
+	}
+}
+
 function showOther(){
 	document.getElementById("other_prop").style.display = 'block';
 	document.getElementById("show_other").style.display = 'none';
