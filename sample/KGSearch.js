@@ -145,7 +145,7 @@ async function getWdIDsByMEse(label,limit){
 }
 
 /*
- * クエリ結果の表示【テーブル表示用】
+ * クエリ結果の表示【テーブル表示用】※セル結合無しの旧版
  */
 function showResultORG(resultData,resultArea){
 	//クエリ結果のJSONデータを「ヘッダ部(keys)」と「値(data)」に分けて処理する
