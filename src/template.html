@@ -42,9 +42,10 @@ async function makeQuery(){
     //SPARQLクエリの実行
 	resultArea.innerHTML="";
 	document.getElementById('result_box').style.display="flex";
-	showSearchIng(resultArea);
-    
+	
+	dispLoading("検索中...");			
 	const resultData = await sendSPARQLQuery(endpoint, query);
+    removeLoading();
     
 	document.getElementById('resjson_area').value = JSON.stringify(resultData,null,'  ');
 	
