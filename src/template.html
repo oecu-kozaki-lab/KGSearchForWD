@@ -29,13 +29,16 @@ window.addEventListener('load', async () => {
 
 //検索に用いるSPARQLクエリを生成し，実行する
 async function makeQuery(){
-    const endpoint = "https://query.wikidata.org/sparql";
+    let endpoint = document.getElementById('ENDPOINT').value;
+    if(endpoint==null){
+        endpoint="https://query.wikidata.org/sparql";
+    }
     const resultArea = document.getElementById('result_div');
 	let query = document.getElementById('query_area').value;
 
     //入力に応じてSPARQLクエリを書き換える（書き方のサンプル）
     const InputText = document.getElementById('INPUT').value;
-    query = query.replace('####',InputText);
+    query = query.replace('#INPUT#',InputText);
 
     document.getElementById('query_area2').value = query;
 
@@ -56,15 +59,15 @@ async function makeQuery(){
 
 <body>
 <header id="head" >
-	<h1>Wikidataを用いた検索システム【テンプレート】</h1>
+	<h1>SPARQLを用いた検索システム【Sample】</h1>
 </header>
 
 <!-- 検索条件設定の領域 -->
 <div id="menu" class="container">
 	<div style="margin-top:4px;">
-		<!-- 検索条件を設定するには下記のコメントを外す  -->
-		Wikidata検索テンプレート<br>
-		 	<input id="INPUT" type="text" value="" autocomplete="off" size="20"/>
+            Endpoint:<input id="ENDPOINT" type="text" value="https://query.wikidata.org/sparql" 
+                autocomplete="off" size="40"/><br>
+            INPUT:<input id="INPUT" type="text" value="大阪" autocomplete="off" size="20"/>
 			<input type="button" id="send" value="検索の実行" style="margin-top:8px; "><br>
 		<hr> 
 		<!-- 下記の「クエリの表示・非表示」ボタンは，必要がなければコメントアウトしてもよい  -->
@@ -80,16 +83,15 @@ async function makeQuery(){
 
 	<div id="query" style="display:none">
 		<b>置き換え前のクエリ</b>：<br>
-<!--注：こちらのクエリは【修正しない！】-->
+<!--置き換えたい文字列があれば「#INPUT#」とする-->
 <textarea id="query_area" class="t_area" rows="10">
-#ネコ
-SELECT ?item ?itemLabel 
+SELECT ?s ?p ?lbl 
 WHERE 
 {
-    ?item wdt:P31 wd:Q146. # ネコでなければならない
-    SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". } # ラベルをあなたの言語で、もしなければ英語で取得する
+    ?s ?p "#INPUT#"@ja;
+    rdfs:label ?lbl.
 }
-LIMIT 50
+LIMIT 10    
 </textarea>	
 	<br>
 		<b>置き換え後のクエリ</b>：<br>
