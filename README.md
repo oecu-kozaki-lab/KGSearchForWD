@@ -1,7 +1,11 @@
 # KGSearchForWD
 Wikidataを使った「知識グラフ検索ツール」開発用のライブラリです．  
 
-本ライブラリを使った検索ツールの作成例は「[こちら](https://oecu-kozaki-lab.github.io/KGSearchForWD/sample/)」から
+本ライブラリを使った検索ツールの作成例は「[こちら](https://kgs.hozo.jp/sample/)」から  
+
+作成例の中でも特におススメは，下記のものです．
+- [Wikidata全体からのEntity検索](https://kgs.hozo.jp/sample/list.html)：キーワードで簡単にWikidataを検索するサービス例
+- [SPARQL検索用の基本テンプレート](https://kgs.hozo.jp/sample/template.html)：任意のSPARQLエンドポイントに対して検索をする際のテンプレートとなる例
 
 ソースコードは，  
 [https://github.com/oecu-kozaki-lab/KGSearchForWD](https://github.com/oecu-kozaki-lab/KGSearchForWD)  

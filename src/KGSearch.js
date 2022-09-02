@@ -322,12 +322,14 @@ function showResult(resultData,resultArea){
 	}
 
 	const contButton = document.getElementById('cont');
-	if(contQuery){ 
-        contButton.style.display="block";
-    }
-    else{
-        contButton.style.display="none";
-    }
+	if(contButton!=null){
+		if(contQuery){ 
+			contButton.style.display="block";
+		}
+		else{
+			contButton.style.display="none";
+		}
+}
 }
 
 
@@ -993,6 +995,13 @@ async function makeWikidataQuery(){
 	showWdResultWithLink(resultData,resultArea); //詳細表示との連携用
 }
 
+/*
+ * 別ウィンドウでSPARQLエンドポイントを開く
+ */
+function openSPARQLendpoint(endpoint,query){
+	open(endpoint
+		 + encodeURIComponent(query));
+}
 
 /* 
  * 検索中...アニメーションの表示

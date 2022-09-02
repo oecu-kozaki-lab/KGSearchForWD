@@ -83,7 +83,7 @@ async function makeQuery(){
 
 	<div id="query" style="display:none">
 		<b>置き換え前のクエリ</b>：<br>
-<!--置き換えたい文字列があれば「#INPUT#」とする-->
+※下記のクエリ内の<B>#INPUT#</B>を，上記のINPUTに入力された文字列に置き換えて検索します．
 <textarea id="query_area" class="t_area" rows="10">
 SELECT ?s ?p ?lbl 
 WHERE 
@@ -94,7 +94,7 @@ WHERE
 LIMIT 10    
 </textarea>	
 	<br>
-		<b>置き換え後のクエリ</b>：<br>
+		<b>置き換え後のクエリ</b>：<br>					
 		<textarea id="query_area2" class="t_area" rows="10" ></textarea><br>
 		<b>クエリ実行結果の戻り値(JSON形式）</b>：<br>
 		<textarea id="resjson_area"  class="t_area" rows="10" ></textarea>

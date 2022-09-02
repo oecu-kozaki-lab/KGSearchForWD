@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
-<title>SPARQLを用いた検索システム【テンプレート】</title>
+<title>SPARQLを用いた検索システム【Wikidata用テンプレート】</title>
 
 <link rel="stylesheet" href="style.css">
 <!-- KG検索用のライブラリ読み込み -->
@@ -29,10 +29,7 @@ window.addEventListener('load', async () => {
 
 //検索に用いるSPARQLクエリを生成し，実行する
 async function makeQuery(){
-    let endpoint = document.getElementById('ENDPOINT').value;
-    if(endpoint==null){
-        endpoint="https://query.wikidata.org/sparql";
-    }
+    const endpoint="https://query.wikidata.org/sparql";
     const resultArea = document.getElementById('result_div');
 	let query = document.getElementById('query_area').value;
 
@@ -59,14 +56,14 @@ async function makeQuery(){
 
 <body>
 <header id="head" >
-	<h1>SPARQLを用いた検索システム【テンプレート】</h1>
+	<h1>SPARQLを用いた検索システム【Wikidata用テンプレート】</h1>
 </header>
 
 <!-- 検索条件設定の領域 -->
 <div id="menu" class="container">
 	<div style="margin-top:4px;">
-            Endpoint:<input id="ENDPOINT" type="text" value="https://query.wikidata.org/sparql" 
-                autocomplete="off" size="40"/><br>
+            <!-- Endpoint:<input id="ENDPOINT" type="text" value="https://query.wikidata.org/sparql" 
+                autocomplete="off" size="40"/><br> -->
             INPUT:<input id="INPUT" type="text" value="大阪" autocomplete="off" size="20"/>
 			<input type="button" id="send" value="検索の実行" style="margin-top:8px; "><br>
 		<hr> 
@@ -94,8 +91,11 @@ WHERE
 LIMIT 10    
 </textarea>	
 	<br>
-		<b>置き換え後のクエリ</b>：<br>					
-		<textarea id="query_area2" class="t_area" rows="10" ></textarea><br>
+		<b>置き換え後のクエリ</b>：
+			<input type="button" value="WikidataでSPARQL検索" 
+					onclick="openSPARQLendpoint('https://query.wikidata.org#',
+							document.getElementById('query_area2').value)"><br>					
+					<textarea id="query_area2" class="t_area" rows="10" ></textarea><br>
 		<b>クエリ実行結果の戻り値(JSON形式）</b>：<br>
 		<textarea id="resjson_area"  class="t_area" rows="10" ></textarea>
 	</div>
