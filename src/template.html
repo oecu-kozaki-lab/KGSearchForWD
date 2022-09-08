@@ -85,13 +85,14 @@ async function makeQuery(){
 		<b>置き換え前のクエリ</b>：<br>
 ※下記のクエリ内の<B>#INPUT#</B>を，上記のINPUTに入力された文字列に置き換えて検索します．
 <textarea id="query_area" class="t_area" rows="10">
-SELECT ?s ?p ?lbl 
+SELECT ?s ?lbl ?p ?o
 WHERE 
 {
-    ?s ?p "#INPUT#"@ja;
-    rdfs:label ?lbl.
+?s rdfs:label ?lbl.
+?s ?p ?o.
+FILTER(regex(?lbl,"#INPUT#"))
 }
-LIMIT 10    
+LIMIT 100   
 </textarea>	
 	<br>
 		<b>置き換え後のクエリ</b>：<br>					
