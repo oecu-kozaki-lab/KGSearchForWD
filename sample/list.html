@@ -15,6 +15,8 @@
 //詳細表示ページ用の設定
 const keylink = "item";	//リンクのkeyとする変数
 const detail_html = "details.html"; //詳細表示用のHTMLファイル
+detailsType = "window";//詳細表示の表示先("window":別Window，"iframe":iframeで同一画面，"blank":別タブ)
+isShowQuery = true;//「クエリ表示」ボタンを表示するか？（サービス公開時はfalseにするとよい）
 
 window.addEventListener('load', () => {
     setButtons();
@@ -26,9 +28,11 @@ async function makeQuery(){
 	let query = document.getElementById('query_area').value;
     const resultArea = document.getElementById('result_div');
 
-    const delailsArea = document.getElementById('details_div');
-    delailsArea.innerHTML='<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>';
-
+    if(detailsType=="iframe"){
+        const delailsArea = document.getElementById('details_div');
+        delailsArea.innerHTML='<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>';
+    }
+    
     query = await makeSPARQLquery(query);
     document.getElementById('query_area2').value = query;
 
@@ -68,7 +72,6 @@ async function makeQuery(){
                     「Wikidata全体」を対象とするとタイムアウトとなるので使用しない。（検索対象を絞ると利用可） -->
                 <!-- <label><input type="radio" id="LabelPart" name="labelType" value="part">部分一致</label> -->
             </div>
-            <b>検索条件</b>:<br>
             <div id="search_cond_div"></div>
             <hr>
             <input type="button" id="dispQuery" value="▼クエリの表示">
@@ -105,9 +108,9 @@ LIMIT 50
         <input type="button" id="cont" value="続きを検索" style=" display: none;" >
     </div>
 	<!-- 詳細表示画面の領域 -->
-	<div id="details_div" >
-		<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>
-	</div>
+	<div id="details_div" ></div>
+	<!-- <iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>
+	</div> -->
 </div>
 <hr>
 This page is developed using <b><a href="https://kgs.hozo.jp/">KGSearchForWD</a></b>

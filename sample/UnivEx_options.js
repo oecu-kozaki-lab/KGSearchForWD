@@ -10,23 +10,23 @@ search_cond =
   },
   {
     "id": "cond2",
-    "ctext": "国（例：アメリカ ※日本は「日本国」と入力）",
-    "cond": "wdt:P17",
-    "val": "",
-    "type": "getID",
-    "const": false
-  },
-  {
-    "id": "cond3",
-    "ctext": "所在地（例：寝屋川市，大阪府）",
-    "cond": "wdt:P131/rdfs:label|wdt:P131/wdt:P131/rdfs:label",
+    "ctext": "国",
+    "cond": "wdt:P17/rdfs:label",
     "val": "",
     "type": "STR-ja",
     "const": false
   },
   {
+    "id": "cond3",
+    "ctext": "所在地（例：寝屋川市，大阪府）",
+    "cond": "wdt:P131|wdt:P131/wdt:P131",
+    "val": "",
+    "type": "getID",
+    "const": false
+  },
+  {
     "id": "cond4",
-    "ctext": "設立年（XXXX年以降，例：1990）",
+    "ctext": "設立年（XXXX年以降,例:1990）",
     "cond": "FILTER(?opt5 >= \"####-01-01T00:00:00Z\"^^xsd:dateTime)",
     "val": "",
     "type": "REPLACE",
@@ -34,7 +34,7 @@ search_cond =
   },
   {
     "id": "cond5",
-    "ctext": "設立年（XXXX以前，例：2010）",
+    "ctext": "設立年（XXXX以前,例:2010）",
     "cond": "FILTER(?opt5 <= \"####-12-31T23:59:59Z\"^^xsd:dateTime)",
     "val": "",
     "type": "REPLACE",

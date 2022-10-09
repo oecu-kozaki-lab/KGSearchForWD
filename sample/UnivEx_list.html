@@ -15,6 +15,8 @@
 //詳細表示ページ用の設定
 const keylink = "item";	//リンクのkeyとする変数
 const detail_html = "UnivEx_details.html"; //詳細表示用のHTMLファイル
+detailsType = "window";//詳細表示の表示先("window":別Window，"iframe":iframeで同一画面，"blank":別タブ)
+isShowQuery = true;//「クエリ表示」ボタンを表示するか？（サービス公開時はfalseにするとよい）
 
 window.addEventListener('load', () => {
     setButtons();
@@ -26,9 +28,11 @@ async function makeQuery(){
 	let query = document.getElementById('query_area').value;
     const resultArea = document.getElementById('result_div');
 
-    const delailsArea = document.getElementById('details_div');
-    delailsArea.innerHTML='<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>';
-
+    if(detailsType=="iframe"){
+        const delailsArea = document.getElementById('details_div');
+        delailsArea.innerHTML='<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>';
+    }
+    
     query = await makeSPARQLquery(query);
     document.getElementById('query_area2').value = query;
 
@@ -52,7 +56,7 @@ async function makeQuery(){
 <!-- 検索条件設定の領域 -->
 <div id="menu" class="container">
 	<div style="margin-top:4px;">
-        <b>大学</b>[<a href="file:///D:/GitHub/KGSearchForWD/src/details.html?key=wd:Q3918">wd:Q3918</a>]の検索<br>
+        <b>Wikidata全体</b>の検索<br>
 		<input id="LABEL" type="text" value="" size="40"/>         
         <input type="button" id="send" value="検索の実行" style="margin-top:8px; "><br>
 	<hr>
@@ -64,9 +68,10 @@ async function makeQuery(){
                 <label><input type="radio" id="LabelFull" name="labelType" value="full">完全一致</label>
                 <label><input type="radio" id="LabelForward" name="labelType" value="forward">前方一致</label>
                 <label><input type="radio" id="LabelAmbi" name="labelType" value="ambi" checked>あいまい検索</label>
+                <!--「部分一致」はSPARQLクエリを利用するため処理が重く、
+                    「Wikidata全体」を対象とするとタイムアウトとなるので使用しない。（検索対象を絞ると利用可） -->
                 <label><input type="radio" id="LabelPart" name="labelType" value="part">部分一致</label>
             </div>
-            <b>検索条件</b>:<br>
             <div id="search_cond_div"></div>
             <hr>
             <input type="button" id="dispQuery" value="▼クエリの表示">
@@ -87,10 +92,9 @@ where{
 LIMIT 50		
 </textarea>
         <br>
-        <b>置き換え後のクエリ</b>：
-        <input type="button" value="WikidataでSPARQL検索" 
-		onclick="openSPARQLendpoint('https://query.wikidata.org#',
-				document.getElementById('query_area2').value)"><br>
+        <b>置き換え後のクエリ</b>：<input type="button" value="WikidataでSPARQL検索" 
+        onclick="openSPARQLendpoint('https://query.wikidata.org#',
+                document.getElementById('query_area2').value)"><br>
         <textarea id="query_area2" class="t_area" rows="10" ></textarea><br>
         <b>クエリ実行結果の戻り値(JSON形式）</b>：<br>
         <textarea id="resjson_area"  class="t_area" rows="10" ></textarea>
@@ -104,9 +108,7 @@ LIMIT 50
         <input type="button" id="cont" value="続きを検索" style=" display: none;" >
     </div>
 	<!-- 詳細表示画面の領域 -->
-	<div id="details_div" >
-		<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>
-	</div>
+	<div id="details_div" ></div>
 </div>
 <hr>
 This page is developed using <b><a href="https://kgs.hozo.jp/">KGSearchForWD</a></b>

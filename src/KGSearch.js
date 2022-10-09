@@ -2,6 +2,12 @@ let offset = 0;
 let contQueryIds = false; //「続きを検索」の表示が必要か？[APIでIDsを取得した際]
 let contQuery = false; //「続きを検索」の表示が必要か？[SPARQL用]
 
+//詳細表示の表示場所
+//"window":別Windowに表示，"iframe":iframeで同一画面に表示，"blank":別タブに表示
+let detailsType = "window";
+
+let isShowQuery = true;//「クエリ表示」ボタンを表示するか？（サービス公開時はfalseにするとよい）
+
 /*
  * endpointで指定されたSPARQLエンドポイントにクエリを送信
  */
@@ -389,14 +395,25 @@ function getHtmlData(val){
  * 詳細表示へのリンク用URLの取得
  */
 function getLinkURL(val){
+	let key = val;
     if(val.startsWith('http://www.wikidata.org/entity/')){//wd:XX
-        let key = 'wd:'+val.replace('http://www.wikidata.org/entity/','');
-		// return '<a href="'+detail_html+'?key='+ key + '" target="details">'+ key+'</a>';
+        key = 'wd:'+val.replace('http://www.wikidata.org/entity/','');
+		
+	}
+    // else{
+	// 	let key = val;
+    //    // return '<a href="'+detail_html+'?key='+ val + '" target="details">'+ val+'</a>';
+    // }
+
+	if(detailsType=="window"){
 		return '<a href="javascript:ShowDetails('+"'"+detail_html+'?key='+ key +"'"+ ');">'+ key+'</a>';
 	}
-    else{
-        return '<a href="'+detail_html+'?key='+ val + '" target="details">'+ val+'</a>';
-    }
+	else if(detailsType=="blank"){
+		return '<a href="'+detail_html+'?key='+ key + '" target="_blank">'+ key+'</a>';
+	}
+	else{
+		return '<a href="'+detail_html+'?key='+ key + '" target="details">'+ key+'</a>';
+	}
 }
 
 /* 
@@ -680,7 +697,8 @@ function showWdResultWithLink(resultData,resultArea){
 /*
  * 検索条件の設定 「クエリ表示」用の時はforDev=true;
  */
-function loadSearchConds(forDev){  
+function loadSearchConds(forDev){
+	let isCond = false;//表示する検索条件の有無
 	let condText = "";
 	let condType = '<select id="condType" name="type" >'
 		+'<option value="ID">IRI(ID)を入力</option>'
@@ -698,6 +716,7 @@ function loadSearchConds(forDev){
 				condText += '<span style="display:none">';
 			}else{ 
 				condText += '<span>';
+				isCond = true;
 			}
 
 			//「クエリ表示」用(forDev=true)の時は表示を変える
@@ -728,6 +747,10 @@ function loadSearchConds(forDev){
 			}
 		condText += '<br></span>';
 		//}
+	}
+
+	if(isCond||forDev){
+		condText = "<b>検索条件</b>:<br>"+condText;
 	}
 	return condText;
 }
@@ -812,6 +835,9 @@ function setButtons(){
     const hideQueryCondButton = document.getElementById('hideQueryCond');
 
     const dispQueryButton = document.getElementById('dispQuery');
+	if(!isShowQuery){
+		dispQueryButton.style.display = 'none';
+	}
     const hideQueryButton = document.getElementById('hideQuery');
     
     const serchCondDiv = document.getElementById('search_cond_div');
@@ -860,7 +886,9 @@ function setButtons(){
         showQueryCondButton.style.display = 'block';
         hideQueryCondButton.style.display = 'none';
         document.getElementById('query').style.display = 'none';
-		dispQueryButton.style.display = 'block';
+		if(isShowQuery){
+			dispQueryButton.style.display = 'block';
+		}
 		hideQueryButton.style.display = 'none';
         saveSearchConds();
         saveSearchProps();
