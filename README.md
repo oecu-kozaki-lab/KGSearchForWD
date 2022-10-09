@@ -17,7 +17,7 @@ Wikidataを使った「**知識グラフ検索ツール**」 開発用のライ�
 「Wikidataを使ったオリジナルの検索サービス」を作成できます．  
 
 作成方法の詳細は，「**[こちらの解説資料](https://docs.google.com/presentation/d/1Mq0ZTU0hoQikX5rEB5m2rlGAPzdD0Wp2nLuOD04lRGY/)**」をご覧ください．
-- [こちら](https://lodc2022wds.peatix.com/)のイベントで使用した解説資料を加筆したもの）です． 
+- [こちら](https://lodc2022wds.peatix.com/)のイベントで使用した解説資料を加筆したものです． 
 - イベントの[動画アーカイブ](https://www.youtube.com/watch?v=ZcZyXu8PygI&t=0s)にて使い方の上記の資料を使った説明をしています（※資料は一部，動画版より更新しています）．
   
 ## 更新内容
