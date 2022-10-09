@@ -168,7 +168,7 @@ function showResultORG(resultData,resultArea){
 	else{
 		mesText = "<table>\n<tr>" ;
 		for(let j = 0; j < keys.length; j++){
-			mesText+='<th style="background:#afeeee">'
+			mesText+='<th>'
 					+getSearchPropLabel(keys[j]) +'</th>';
 		}
 		mesText+="</tr>\n";
@@ -183,10 +183,10 @@ function showResultORG(resultData,resultArea){
 				val =data[i][keys[j]].value;
 			}
             if(keys[j]==keylink){ //変数名が「keylink」のときは詳細表示へのリンク
-                mesText += '<th>'+getLinkURL(val)+'</th>';
+                mesText += '<td>'+getLinkURL(val)+'</td>';
             }
             else{
-                mesText += '<th>'+getHtmlData(val)+'</th>';
+                mesText += '<td>'+getHtmlData(val)+'</td>';
             }			
 		} 
 		mesText+="</tr>";
@@ -229,7 +229,7 @@ function showResult(resultData,resultArea){
 	else{
 		mesText = "<table>\n<tr>" ;
 		for(let j = 0; j < keys.length; j++){
-			mesText+='<th style="background:#afeeee">'
+			mesText+='<th>'
 					+getSearchPropLabel(keys[j]) +'</th>';
 		}
 		mesText+="</tr>\n";
@@ -304,10 +304,10 @@ function showResult(resultData,resultArea){
             }		
 
 			if(rownum[i][j]>1){
-				mesText+='<th rowspan="'+rownum[i][j]+'">'+ valText+ "</th>";
+				mesText+='<td rowspan="'+rownum[i][j]+'">'+ valText+ "</td>";
 			}
 			else if(rownum[i][j]!=0){
-				mesText+="<th>"+ valText+ "</th>";	
+				mesText+="<td>"+ valText+ "</td>";	
 				}		
 		} 
 
@@ -486,7 +486,7 @@ function showResultDetails(resultData,resultArea,props){
 	
 	//見出し語部分	
 	if(data[0]['item']!=null){
-		labelText += '<h2 style="background:#afeeee">'+data[0]['itemLabel'].value
+		labelText += '<h2 class="details-title">'+data[0]['itemLabel'].value
 			+'<br><font size="3">（Wikidata ID:<a href="'+data[0]['item'].value.replace('http://','https://')
 			+'" target="_blank">'
             +data[0]['item'].value.replace('http://www.wikidata.org/entity/',"")
