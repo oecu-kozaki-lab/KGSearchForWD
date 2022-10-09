@@ -26,8 +26,8 @@ async function makeQuery(){
 	let query = document.getElementById('query_area').value;
     const resultArea = document.getElementById('result_div');
 
-    const delailsArea = document.getElementById('details_div');
-    delailsArea.innerHTML='<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>';
+    // const delailsArea = document.getElementById('details_div');
+    // delailsArea.innerHTML='<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>';
 
     query = await makeSPARQLquery(query);
     document.getElementById('query_area2').value = query;
@@ -105,9 +105,9 @@ LIMIT 50
         <input type="button" id="cont" value="続きを検索" style=" display: none;" >
     </div>
 	<!-- 詳細表示画面の領域 -->
-	<div id="details_div" >
+	<!-- <div id="details_div" >
 		<iframe src="" name="details"style="width: 400px; height: 80hv;"></iframe>
-	</div>
+	</div> -->
 </div>
 <hr>
 This page is developed using <b><a href="https://kgs.hozo.jp/">KGSearchForWD</a></b>

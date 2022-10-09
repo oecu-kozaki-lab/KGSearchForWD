@@ -391,12 +391,25 @@ function getHtmlData(val){
 function getLinkURL(val){
     if(val.startsWith('http://www.wikidata.org/entity/')){//wd:XX
         let key = 'wd:'+val.replace('http://www.wikidata.org/entity/','');
-		return '<a href="'+detail_html+'?key='+ key + '" target="details">'+ key+'</a>';
+		// return '<a href="'+detail_html+'?key='+ key + '" target="details">'+ key+'</a>';
+		return '<a href="javascript:ShowDetails('+"'"+detail_html+'?key='+ key +"'"+ ');">'+ key+'</a>';
 	}
     else{
         return '<a href="'+detail_html+'?key='+ val + '" target="details">'+ val+'</a>';
     }
 }
+
+/* 
+ * 詳細を別ウィンドウに表示する 
+ */
+function ShowDetails(page) {
+	let lw = window.innerWidth - 400;
+	let y = window.screenY + 100;
+
+	if(lw<0){lw=100;}
+	// window.open(page,"DetailsWin","left=400,top=200,width=400,height=600,scrollbars=1");
+	window.open(page,"DetailsWin","left="+lw+",top="+y+",width=400,height=600,scrollbars=1");
+	}
 
 /*
  * クエリ結果の表示処理[指定したデータの詳細表示用]
@@ -803,6 +816,7 @@ function setButtons(){
     
     const serchCondDiv = document.getElementById('search_cond_div');
     const serchPropDiv = document.getElementById('search_prop_div');
+    const queryDiv = document.getElementById('query');
 
     serchCondDiv.innerHTML = loadSearchConds(false);//詳細検索画面の設定
     serchPropDiv.innerHTML = loadSearchProps();//検索条件設定画面の設定
@@ -814,6 +828,7 @@ function setButtons(){
         contQuery = false;
         document.getElementById("result_div").innerHTML="";
         contButton.style.display="none";
+
         makeQuery();
 		//makeWikidataQuery();
 	}, false);
@@ -826,7 +841,10 @@ function setButtons(){
 			contQuery = false;
 			document.getElementById("result_div").innerHTML="";
 			contButton.style.display="none";
-			makeQuery();
+			//「クエリ表示」をしているときは検索を実行しない（クエリの編集ができるように）
+			if(queryDiv.style.display=="none"){
+				makeQuery();
+			}
         }
     }
 
