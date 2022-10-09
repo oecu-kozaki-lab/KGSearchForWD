@@ -44,6 +44,14 @@ search_cond =
     "val": "",
     "type": "",
     "const": false
+  }  ,
+  {
+    "id": "cond6",
+    "ctext": "",
+    "cond": "",
+    "val": "",
+    "type": "",
+    "const": false
   }
 ];
 
@@ -58,30 +66,30 @@ search_prop =
     "id": "opt1",
     "prop": "",
     "pname": "",
-    "optional": false
+    "optional": true
   },
   {
     "id": "opt2",
     "prop": "",
     "pname": "",
-    "optional": false
+    "optional": true
   },
   {
     "id": "opt3",
     "prop": "",
     "pname": "",
-    "optional": false
+    "optional": true
   },
   {
     "id": "opt4",
     "prop": "",
     "pname": "",
-    "optional": false
+    "optional": true
   },
   {
     "id": "opt5",
     "prop": "",
     "pname": "",
-    "optional": false
+    "optional": true
   }
 ];
