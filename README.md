@@ -1,6 +1,9 @@
 # KGSearchForWD
 Wikidataを使った「**知識グラフ検索ツール**」 開発用のライブラリです．  
 
+[<img width="600" alt="kgs_image" src="https://raw.githubusercontent.com/oecu-kozaki-lab/KGSearchForWD/main/doc/kgs_image.png">](https://kgs.hozo.jp/sample/UnivEx_list.html)
+
+
 本ライブラリを使った検索ツールの作成例は「**[こちら](https://kgs.hozo.jp/sample/)**」から  
 
 作成例の中でも特におススメは，下記のものです．
