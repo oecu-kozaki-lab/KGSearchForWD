@@ -79,25 +79,26 @@ async function makeQuery(){
         </div>
     </div>
     <div id="query" style="display:none">
-        <b>検索項目設定</b>：<br>
+        <b>検索項目設定</b>:<br>
         <div id="search_prop_div"></div>
-        <b>設定用ファイル</b>：<br>
+        <b>設定用ファイル</b>:<br>
         <textarea id="settings_area" class="t_area" rows="10" ></textarea><br>
-        <b>置き換え前のクエリ</b>：<br>
+        <b>置き換え前のクエリ</b>:<br>
 <textarea id="query_area" class="t_area" rows="10">
 select DISTINCT ?item ?itemLabel
 where{
     SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
-}
+}ORDER BY ?itemLabel
 LIMIT 50		
 </textarea>
         <br>
-        <b>置き換え後のクエリ</b>：<input type="button" value="WikidataでSPARQL検索" 
+        <b>置き換え後のクエリ</b>:<input type="button" value="WikidataでSPARQL検索" 
         onclick="openSPARQLendpoint('https://query.wikidata.org#',
                 document.getElementById('query_area2').value)"><br>
         <textarea id="query_area2" class="t_area" rows="10" ></textarea><br>
-        <b>クエリ実行結果の戻り値(JSON形式）</b>：<br>
+        <b>クエリ実行結果の戻り値(JSON形式）</b>:<br>
         <textarea id="resjson_area"  class="t_area" rows="10" ></textarea>
+        <!-- <br><input type="button" id="html-output" value="HTMLの出力"> -->
     </div>
 </div>
 

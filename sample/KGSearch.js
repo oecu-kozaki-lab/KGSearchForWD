@@ -447,13 +447,16 @@ function showResultDetails(resultData,resultArea,props){
 
 	let rownum = [];
 	let rowprop = [];
-	rownum[0] = 1;
-	rowprop[0] = data[0]['p'].value;
-	for(let i=1 ;i<len;i++){
+	// rownum[0] = 1;
+	// rowprop[0] = data[0]['p'].value;
+	for(let i= 0 ;i<len;i++){
 		rowprop[i] = data[i]['p'].value;
-		if(data[i]['p'].value == data[i-1]['p'].value){
+		if(i==0){
+			rownum[0] = 1;
+		}
+		else if(data[i]['p'].value == data[i-1]['p'].value){
 			rownum[i] = 0;
-			for(let j=i;j>0;j--){
+			for(let j=i;j>=0;j--){
 				if(rownum[j]>0){
 					rownum[j]++;
 					break;
@@ -825,6 +828,16 @@ function saveSearchProps(){
    }
 
 /*
+ * テスト中：検索設定の画面のloadを独立させる場合の関数【今は使っていない】
+ */
+function setSearchConds(){
+	const serchCondDiv = document.getElementById('search_cond_div');
+    const serchPropDiv = document.getElementById('search_prop_div');
+	serchCondDiv.innerHTML = loadSearchConds(false);//詳細検索画面の設定
+    serchPropDiv.innerHTML = loadSearchProps();//検索条件設定画面の設定
+}
+
+/*
  * 各ボタンの設定
  */
 function setButtons(){
@@ -844,9 +857,25 @@ function setButtons(){
     const serchPropDiv = document.getElementById('search_prop_div');
     const queryDiv = document.getElementById('query');
 
+	const outputHTML = document.getElementById('html-output');
+
     serchCondDiv.innerHTML = loadSearchConds(false);//詳細検索画面の設定
     serchPropDiv.innerHTML = loadSearchProps();//検索条件設定画面の設定
-    
+ 
+/* 調整中   
+	outputHTML.addEventListener('click', async () => {
+		document.getElementById("result_div").innerHTML="";
+		document.getElementById("query_area2").value="";
+		document.getElementById("resjson_area").value="";
+		
+        console.log('<!DOCTYPE html>\n<html lang="ja">\n'
+					+document.head.innerHTML
+					+"</head>\n<body>"
+					+document.body.innerHTML
+					+"</body>\n</html>"
+					);
+	}, false);
+*/
 	//検索実行ボタンの処理
 	sendButton.addEventListener('click', async () => {
         offset = 0;  

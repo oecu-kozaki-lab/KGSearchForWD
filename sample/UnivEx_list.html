@@ -56,7 +56,7 @@ async function makeQuery(){
 <!-- 検索条件設定の領域 -->
 <div id="menu" class="container">
 	<div style="margin-top:4px;">
-        <b>Wikidata全体</b>の検索<br>
+        <b>大学[<a href="details.html?key=wd:Q3918" target="_blank">wd:Q3918</a>]</b>の検索<br>
 		<input id="LABEL" type="text" value="" size="40"/>         
         <input type="button" id="send" value="検索の実行" style="margin-top:8px; "><br>
 	<hr>
@@ -88,7 +88,7 @@ async function makeQuery(){
 select DISTINCT ?item ?itemLabel
 where{
     SERVICE wikibase:label { bd:serviceParam wikibase:language "ja,en". }
-}
+}ORDER BY ?itemLabel
 LIMIT 50		
 </textarea>
         <br>
