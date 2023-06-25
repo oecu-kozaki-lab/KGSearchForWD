@@ -66,11 +66,11 @@ async function makeQuery(){
             <div>
             <b>ラベルの検索設定</b>:<br>
                 <label><input type="radio" id="LabelFull" name="labelType" value="full">完全一致</label>
-                <label><input type="radio" id="LabelForward" name="labelType" value="forward">前方一致</label>
-                <label><input type="radio" id="LabelAmbi" name="labelType" value="ambi" checked>あいまい検索</label>
+                <label><input type="radio" id="LabelForward" name="labelType" value="forward" checked>前方一致</label>
+                <label><input type="radio" id="LabelAmbi" name="labelType" value="ambi">あいまい検索</label>
                 <!--「部分一致」はSPARQLクエリを利用するため処理が重く、
                     「Wikidata全体」を対象とするとタイムアウトとなるので使用しない。（検索対象を絞ると利用可） -->
-                <!-- <label><input type="radio" id="LabelPart" name="labelType" value="part">部分一致</label> -->
+                <!--<label><input type="radio" id="LabelPart" name="labelType" value="part">部分一致</label>-->
             </div>
             <div id="search_cond_div"></div>
             <hr>
