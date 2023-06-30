@@ -7,7 +7,7 @@ Wikidataを使った「**知識グラフ検索ツール**」 開発用のライ�
 本ライブラリを使った検索ツールの作成例は「**[こちら](https://kgs.hozo.jp/sample/)**」から  
 
 作成例の中でも特におススメは，下記のものです．
-- **[Wikidata全体からのEntity検索](https://kgs.hozo.jp/sample/list.html)**：キーワードで簡単にWikidataを検索するサービス例（[分類付きバージョン](https://kgs.hozo.jp/sample/wd-search.html)*）  
+- **[Wikidata全体からのEntity検索](https://kgs.hozo.jp/sample/list.html)**：キーワードで簡単にWikidataを検索するサービス例（[分類付きバージョン](https://kgs.hozo.jp/sample/wd-search.html)）  
   →このサービスを元に，検索用の設定を行うと，「**オリジナルの検索サービス**」が簡単に作成できます．
 - **[SPARQL検索用の基本テンプレート](https://kgs.hozo.jp/sample/template.html)**：任意のSPARQLエンドポイントに対して検索をする際のテンプレートとなる例
 
