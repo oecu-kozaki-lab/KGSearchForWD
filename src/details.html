@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="style.css" />
     <!-- KG検索用のライブラリ読み込み -->
     <script src="KGSearch.js"></script>
+    <!-- sameAsでのリダイレクトに対応するために、福田が追加したところ start-->
     <script>
       const resolveWikidataId = async (qid) => {
         const endpointUrl = 'https://query.wikidata.org/sparql';
@@ -32,6 +33,7 @@
       };
 
     </script>
+    <!-- sameAsでのリダイレクトに対応するために、福田が追加したところ end-->
     <script>
       //詳細表示ページ用の設定
       const keylink = 'item'; //リンクのkeyとする変数
