@@ -9,7 +9,29 @@
     <link rel="stylesheet" href="style.css" />
     <!-- KG検索用のライブラリ読み込み -->
     <script src="KGSearch.js"></script>
+    <script>
+      const resolveWikidataId = async (qid) => {
+        const endpointUrl = 'https://query.wikidata.org/sparql';
+        const query = `
+			SELECT ?s WHERE {
+				BIND(wd:${qid} as ?input)
+				OPTIONAL{
+					?input owl:sameAs/owl:sameAs* ?transfer .
+				}
+				FILTER(REGEX(STR(?transfer), "^http://www.wikidata.org/entity/")) #sameAsを、WikidataのEntityのみに絞り込む
+				# transferに値が束縛されている(sameAsがある)場合はtransferを、そうでない場合はinputを?sに束縛する
+				BIND(IF(bound(?transfer), ?transfer, ?input) as ?s)
+			}LIMIT 1
+			`;
+        const result = await sendQuery(endpointUrl, query);
+        /* 上記のクエリは、sameAsがない場合は入力したIDを返す
+          そのため、ネットワークエラーやjsonの解釈でエラーがでない限りは値があると考えてよい */
+        const resultIri = result['results']['bindings'][0]['s']['value'];
 
+        return resultIri.replace('http://www.wikidata.org/entity/', '');
+      };
+
+    </script>
     <script>
       //詳細表示ページ用の設定
       const keylink = 'item'; //リンクのkeyとする変数
