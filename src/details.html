@@ -31,6 +31,66 @@
 
         return resultIri.replace('http://www.wikidata.org/entity/', '');
       };
+      /* dataをProptyでまとめる */
+      const bundleDataWithProperty = (data) => {
+        const propList = Array.from(
+          new Map(data.map((x) => [x['p']['value'], x['propLabel']?.['value']]))
+        );
+        console.log(propList);
+        /* dataObjectの要素例
+          "http://www.wikidata.org/prop/direct/P856": {
+            "label": "公式ウェブサイト",
+            "objs": [
+                {
+                    "o": {
+                        "type": "uri",
+                        "value": "https://www.city.neyagawa.osaka.jp/"
+                    },
+                    "oLabel": {
+                        "type": "literal",
+                        "value": "https://www.city.neyagawa.osaka.jp/"
+                    }
+                },
+                {
+                    "o": {
+                        "type": "uri",
+                        "value": "https://www.city.neyagawa.osaka.jp/roma2/"
+                    },
+                    "oLabel": {
+                        "type": "literal",
+                        "value": "https://www.city.neyagawa.osaka.jp/roma2/"
+                    }
+                },
+                {
+                    "o": {
+                        "type": "uri",
+                        "value": "https://www.city.neyagawa.osaka.jp/yasashiinihongo/"
+                    },
+                    "oLabel": {
+                        "type": "literal",
+                        "value": "https://www.city.neyagawa.osaka.jp/yasashiinihongo/"
+                    }
+                }
+            ]
+          },
+        */
+        return Object.fromEntries(
+          propList.map(([propIri, propLabel]) => {
+            return [
+              propIri,
+              {
+                label: propLabel,
+                objs: data
+                  .filter((x) => x['p']['value'] === propIri)
+                  .map((x) => {
+                    const { o, oLabel } = x;
+                    return { o, oLabel };
+                  }),
+              },
+            ];
+          })
+        );
+      };
       function showResultDetailsFukuda(resultData, resultArea, props) {
         //表示するプロパティの順番を設定
         /* propsの長さを取得する。
