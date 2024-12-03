@@ -31,6 +31,141 @@
 
         return resultIri.replace('http://www.wikidata.org/entity/', '');
       };
+      function showResultDetailsFukuda(resultData, resultArea, props) {
+        //表示するプロパティの順番を設定
+        let propLen = 0;
+        if (props != null) {
+          propLen = props.length;
+        }
+        const data = resultData.results.bindings;
+        const len = data.length;
+
+        if (len == 0) {
+          resultArea.innerHTML = '検索結果なし';
+          return;
+        }
+
+        let rownum = [];
+        let rowprop = [];
+        // rownum[0] = 1;
+        // rowprop[0] = data[0]['p'].value;
+        for (let i = 0; i < len; i++) {
+          rowprop[i] = data[i]['p'].value;
+          if (i == 0) {
+            rownum[0] = 1;
+          } else if (data[i]['p'].value == data[i - 1]['p'].value) {
+            rownum[i] = 0;
+            for (let j = i; j >= 0; j--) {
+              if (rownum[j] > 0) {
+                rownum[j]++;
+                break;
+              }
+            }
+          } else {
+            rownum[i] = 1;
+          }
+        }
+        // for(var i = 0; i < rownum.length; i++) {
+        // 	　console.log(rowprop[i] +'='+rownum[i]);
+        // 	}
+
+        //ラベル,説明,上位クラス
+        let labelText = '';
+        let altLabelText = '';
+        let descText = '';
+        let subCls = '';
+        let insOf = '';
+
+        //順番を指定したプロパティ用
+        let texts = [];
+        for (let j = 0; j < propLen; j++) {
+          texts.push('');
+        }
+        //その他用
+        let otherText = '';
+
+        //見出し語部分
+        if (data[0]['item'] != null) {
+          labelText +=
+            '<h2 class="details-title">' +
+            data[0]['itemLabel'].value +
+            '<br><font size="3">（Wikidata ID:<a href="' +
+            data[0]['item'].value.replace('http://', 'https://') +
+            '" target="_blank">' +
+            data[0]['item'].value.replace(
+              'http://www.wikidata.org/entity/',
+              ''
+            ) +
+            '</a>）</font></h2>';
+        }
+
+        labelText += '<table class="result-table">';
+
+        for (let i = 0; i < len; i++) {
+          let prop = data[i]['p'].value.replace(
+            'http://www.wikidata.org/prop/direct/',
+            'wdt:'
+          );
+          if (prop.endsWith('rdf-schema#label')) {
+            labelText += showData(data[i], rownum[i]);
+          } else if (prop.endsWith('core#altLabel')) {
+            altLabelText += showData(data[i], rownum[i]);
+          } else if (prop.endsWith('schema.org/description')) {
+            descText += showData(data[i], rownum[i]);
+          } else if (prop.endsWith('P279')) {
+            subCls += showData(data[i], rownum[i]);
+          } else if (prop.endsWith('P31')) {
+            insOf += showData(data[i], rownum[i]);
+          }
+          //wdt:以外のプロパティは表示しない【暫定処理】
+          else if (prop.startsWith('wdt:')) {
+            let sw = true;
+            for (let j = 0; j < propLen; j++) {
+              if (prop.endsWith(props[j])) {
+                texts[j] += showData(data[i], rownum[i]);
+                sw = false;
+                break;
+              }
+            }
+            if (sw) {
+              otherText += showData(data[i], rownum[i]);
+            }
+          }
+        }
+        // labelText += "</table>\n" ;
+        let mesText = labelText + altLabelText + descText + '</table><hr>';
+        if ('' != subCls + insOf) {
+          mesText +=
+            '<table class="result-table">' + subCls + insOf + '</table><hr>';
+        }
+
+        let propText = '';
+        for (let j = 0; j < propLen; j++) {
+          propText += texts[j];
+        }
+
+        if (otherText != '') {
+          otherText = '<table class="result-table">' + otherText + '</table>';
+        }
+        //表示するプロパティを指定している場合は，「すべて表示」ボタンでの制御を追加
+        if (propText != '') {
+          mesText += '<table class="result-table">' + propText + '</table><hr>';
+          mesText +=
+            '<input type="button" id="show_other" value="▼すべて表示" onclick="showOther()">' +
+            '<input type="button" id="hide_other"' +
+            ' style="display: none;" value="▲表示を減らす" onclick="hideOther()"><br>';
+          mesText +=
+            '<div id="other_prop" style="display: none;" >' +
+            otherText +
+            '</div>';
+        } else {
+          mesText += otherText;
+        }
+
+        console.log(mesText);
+
+        resultArea.innerHTML = mesText;
+      }
 
     </script>
     <!-- sameAsでのリダイレクトに対応するために、福田が追加したところ end-->
