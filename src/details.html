@@ -33,10 +33,11 @@
       };
       function showResultDetailsFukuda(resultData, resultArea, props) {
         //表示するプロパティの順番を設定
-        let propLen = 0;
-        if (props != null) {
-          propLen = props.length;
-        }
+        /* propsの長さを取得する。
+          オプショナルチェーン(?.)によって、propsがnullならundefinedが返る。
+          Null合体演算子(??)によって、左がnullまたはundifinedの場合のみ、右の値が代入される。
+        */
+        const propLen = props?.length ?? 0;
         const data = resultData.results.bindings;
         const len = data.length;
 
