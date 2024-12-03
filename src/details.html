@@ -83,17 +83,17 @@
 
         //見出し語部分
         if (data[0]['item'] != null) {
-          labelText +=
-            '<h2 class="details-title">' +
-            data[0]['itemLabel'].value +
-            '<br><font size="3">（Wikidata ID:<a href="' +
-            data[0]['item'].value.replace('http://', 'https://') +
-            '" target="_blank">' +
-            data[0]['item'].value.replace(
-              'http://www.wikidata.org/entity/',
-              ''
-            ) +
-            '</a>）</font></h2>';
+          const itemLabel = data[0]['itemLabel'].value;
+          const convertedItemIri2Https = data[0]['item'].value.replace(
+            'http://',
+            'https://'
+          );
+          const itemId = data[0]['item'].value.replace(
+            'http://www.wikidata.org/entity/',
+            ''
+          );
+          const headerHtml = `<h2 class="details-title">${itemLabel}<br><font size="3">（Wikidata ID:<a href="${convertedItemIri2Https}" target="_blank">${itemId}</a>）</font></h2>`;
+          labelText += headerHtml;
         }
 
         labelText += '<table class="result-table">';
