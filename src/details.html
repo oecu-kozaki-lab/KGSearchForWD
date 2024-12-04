@@ -15,7 +15,7 @@
         const endpointUrl = 'https://query.wikidata.org/sparql';
         const query = `
           SELECT ?s WHERE {
-            BIND(wd:${qid} as ?input)
+            BIND(${qid} as ?input)
             OPTIONAL{
               ?input owl:sameAs/owl:sameAs* ?transfer .
             }
@@ -24,12 +24,13 @@
             BIND(IF(bound(?transfer), ?transfer, ?input) as ?s)
           }LIMIT 1
         `;
-        const result = await sendQuery(endpointUrl, query);
+        const resultJson = await sendQuery(endpointUrl, query);
+        const result = await resultJson.json();
         /* 上記のクエリは、sameAsがない場合は入力したIDを返す
           そのため、ネットワークエラーやjsonの解釈でエラーがでない限りは値があると考えてよい */
         const resultIri = result['results']['bindings'][0]['s']['value'];
 
-        return resultIri.replace('http://www.wikidata.org/entity/', '');
+        return resultIri.replace('http://www.wikidata.org/entity/', 'wd:');
       };
       /* dataをProptyでまとめる */
       const bundleDataWithProperty = (data) => {
