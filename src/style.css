@@ -120,6 +120,14 @@ iframe {
   width: 120px;
 }
 
+/* fukuda 追加 */
+.result-table {
+  img {
+    width: 100%;
+    max-width: 30rem;
+  }
+}
+
 /*Entityの詳細表示ページのLoading 画像用
 （https://www.benricho.org/loading_images/withCSS_04/02.html より） */
 .flower-spinner,
